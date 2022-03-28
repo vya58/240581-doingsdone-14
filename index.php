@@ -40,6 +40,17 @@ $tasks = [
     'Выполнен' => false
     ]
 ];
+
+function count_tasks_in_project(array $tasks, $project) {
+    # Подсчет количества задач в проекте
+    $count = 0;
+    foreach ($tasks as $task) {
+        if($task['Категория'] == $project) {
+            $count++;
+        }
+    }
+    return $count;
+}
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -84,7 +95,7 @@ $tasks = [
                     <?php foreach ($projects as $project): ?>
                     <li class="main-navigation__list-item">
                         <a class="main-navigation__list-item-link" href="#"><?= $project; ?></a>
-                        <span class="main-navigation__list-item-count">0</span>
+                        <span class="main-navigation__list-item-count"><?= count_tasks_in_project($tasks, $project) ?></span>
                     </li>
                     <?php endforeach;?>
                     </ul>
@@ -124,7 +135,7 @@ $tasks = [
                     <tr class="tasks__item task <?php if($task['Выполнен']) echo 'task--completed'; ?>">
                         <td class="task__select">
                             <label class="checkbox task__checkbox">
-                                <input class="checkbox__input visually-hidden task__checkbox" type="checkbox" value="<?= ($key+1); ?>">
+                                <input class="checkbox__input visually-hidden task__checkbox" type="checkbox" value="1">
                                 <span class="checkbox__text"><?= $task['Задача'] ?></span>
                             </label>
                         </td>
