@@ -46,7 +46,7 @@ function count_tasks_in_project(array $tasks, $project) {
     # Подсчет количества задач в проекте
     $count = 0;
     foreach ($tasks as $task) {
-        if($task['Категория'] == $project) {
+        if(htmlspecialchars($task['Категория']) == $project) {
             $count++;
         }
     }
