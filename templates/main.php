@@ -43,7 +43,7 @@
     <table class="tasks">
         <?php foreach ($tasks as $key => $task): ?>
         <?php if($task['Выполнен'] && 0 == $show_complete_tasks) continue; ?>
-            <tr class="tasks__item task <?php if($task['Выполнен']) echo 'task--completed'; ?>">
+            <tr class="tasks__item task <?php if($task['Выполнен']) echo 'task--completed'; ?> <?php if($task['Дата выполнения'] && strtotime($task['Дата выполнения']) < strtotime("now + 24 hours")) echo 'task--important'; ?>">
             <td class="task__select">
                 <label class="checkbox task__checkbox">
                     <input class="checkbox__input visually-hidden task__checkbox" type="checkbox" value="1">
