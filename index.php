@@ -6,7 +6,7 @@ $projects = ['Входящие', 'Учеба', 'Работа', 'Домашние
 $tasks = [
     [
     'Задача' => 'Собеседование в IT компании',
-    'Дата выполнения' => '01.12.2019',
+    'Дата выполнения' => '05.04.2022',
     'Категория' => 'Работа',
     'Выполнен' => false
     ],
@@ -46,12 +46,13 @@ function count_tasks_in_project(array $tasks, $project) {
     # Подсчет количества задач в проекте
     $count = 0;
     foreach ($tasks as $task) {
-        if(htmlspecialchars($task['Категория']) == $project) {
+        if($task['Категория'] == $project) {
             $count++;
         }
     }
     return $count;
 }
+
 
 $main_content = include_template('main.php', [
     'projects' => $projects,
