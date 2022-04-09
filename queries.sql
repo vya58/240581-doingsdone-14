@@ -102,12 +102,19 @@ INSERT INTO tasks (task_date_create, task_status, task_name, task_deadline, user
             )
        );
 
+-- Запрос на получение списка из всех проектов для пользователя 'anton', отсортированных в алфавитном порядке
+SELECT project_name
+  FROM 
+    users
+    INNER JOIN projects
+            ON users.user_id = projects.user_id
+ WHERE user_name = 'anton'
+ORDER BY project_name;
+
 -- Запрос на получение списка всех задач для одного проекта (Работа), отсортированных по дате создания
 SELECT task_name
   FROM tasks
-  INNER JOIN projects
-          ON tasks.project_id = projects.project_id
- WHERE project_name = 'Работа'
+ WHERE project_id = 4
 ORDER BY task_date_create;
 
 -- Запрос на пометку задачи "'Собеседование в IT компании' пользователя 'anton'", как выполненной
