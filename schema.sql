@@ -4,29 +4,28 @@ CREATE DATABASE doings_done
 
 CREATE TABLE users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
-    email CHAR(255) NOT NULL UNIQUE,
-    username CHAR(50) NOT NULL UNIQUE,
-    pass CHAR(255) NOT NULL,
-    date_add DATETIME
+    user_email CHAR(255) NOT NULL UNIQUE,
+    user_name CHAR(50) NOT NULL UNIQUE,
+    user_password CHAR(255) NOT NULL,
+    user_date_add DATETIME NOT NULL
 );
 
 CREATE TABLE projects (
     project_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT (10) NOT NULL,
-    name_project VARCHAR(30) NOT NULL,
+    user_id INT NOT NULL,
+    project_name VARCHAR(30) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (user_id)
 );
 
 CREATE TABLE tasks (
     task_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT (10) NOT NULL,
-    project_id INT (10) NOT NULL,
-    name_task VARCHAR(50) NOT NULL,
-    date_create DATETIME,
-    task_status TINYINT(1) DEFAULT 0,
-    file_task VARCHAR(255) UNIQUE,
-    deadline DATETIME,
+    user_id INT NOT NULL,
+    project_id INT NOT NULL,
+    task_name VARCHAR(50) NOT NULL,
+    task_date_create DATETIME NOT NULL,
+    task_status TINYINT DEFAULT 0 check (task_status in (0, 1)),
+    task_file VARCHAR(255) UNIQUE,
+    task_deadline DATETIME,
     FOREIGN KEY (user_id) REFERENCES users (user_id),
     FOREIGN KEY (project_id) REFERENCES projects (project_id)
 );
-
