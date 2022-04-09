@@ -17,6 +17,9 @@ CREATE TABLE projects (
     FOREIGN KEY (user_id) REFERENCES users (user_id)
 );
 
+ALTER TABLE projects
+ ADD UNIQUE user_project_uk (user_id, project_name);
+
 CREATE TABLE tasks (
     task_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
