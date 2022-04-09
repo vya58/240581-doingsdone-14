@@ -1,4 +1,6 @@
-CREATE DATABASE doings_done;
+CREATE DATABASE doings_done
+    DEFAULT CHARACTER SET utf8
+    DEFAULT COLLATE utf8_general_ci;
 
 CREATE TABLE users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
