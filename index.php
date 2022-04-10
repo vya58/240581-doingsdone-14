@@ -12,11 +12,14 @@ if (!$link) {
 // показывать или нет выполненные задачи
 $show_complete_tasks = rand(0, 1);
 
-$user = 4;
+$user = intval(4);
 
-// запрос в БД списка категорий
-$sql = "SELECT project_name FROM projects WHERE user_id = $user ORDER BY project_id";
-$result = mysqli_query($link, $sql);
+// запрос в БД списка категорий с помощью подготовленных выражений
+$sql = "SELECT project_name FROM projects WHERE user_id = ? ORDER BY project_id";
+$stmt = mysqli_prepare($link, $sql);
+mysqli_stmt_bind_param($stmt, 'i', $user);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
 
 if (!$result) {
     $error = mysqli_error($link);
@@ -26,11 +29,14 @@ if (!$result) {
     $projects = mysqli_fetch_all($result, MYSQLI_ASSOC);
  }
 
- // запрос в БД списка задач
+ // запрос в БД списка задач с помощью подготовленных выражений
 $sql = "SELECT task_name, task_deadline, project_name, task_status FROM tasks "
      . "INNER JOIN projects ON tasks.project_id = projects.project_id "
-     . "WHERE tasks.user_id = $user ORDER BY task_date_create";
-$result = mysqli_query($link, $sql);
+     . "WHERE tasks.user_id = ? ORDER BY task_date_create";
+$stmt = mysqli_prepare($link, $sql);
+mysqli_stmt_bind_param($stmt, 'i', $user);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
 
 if (!$result) {
     $error = mysqli_error($link);
