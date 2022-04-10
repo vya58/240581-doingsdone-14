@@ -3,7 +3,7 @@
 
     <nav class="main-navigation">
         <ul class="main-navigation__list">
-            <?php foreach ($projects as $project): ?>
+            <?php foreach ($projects as $project): $project = $project['project_name']?>
             <li class="main-navigation__list-item">
                 <a class="main-navigation__list-item-link" href="#"><?= htmlspecialchars($project); ?></a>
                 <span class="main-navigation__list-item-count"><?= count_tasks_in_project($tasks, $project); ?></span>
@@ -42,12 +42,12 @@
 
     <table class="tasks">
         <?php foreach ($tasks as $key => $task): ?>
-        <?php if($task['Выполнен'] && 0 == $show_complete_tasks) continue; ?>
-            <tr class="tasks__item task <?php if($task['Выполнен']) echo 'task--completed'; ?> <?php if(!empty($task['Дата выполнения']) && strtotime($task['Дата выполнения']) < strtotime("now + 24 hours")) echo 'task--important'; ?>">
+        <?php if($task['task_status'] && 0 == $show_complete_tasks) continue; ?>
+            <tr class="tasks__item task <?php if($task['task_status']) echo 'task--completed'; ?> <?php if(!empty($task['task_deadline']) && strtotime($task['task_deadline']) < strtotime("now + 24 hours")) echo 'task--important'; ?>">
             <td class="task__select">
                 <label class="checkbox task__checkbox">
                     <input class="checkbox__input visually-hidden task__checkbox" type="checkbox" value="1">
-                    <span class="checkbox__text"><?= htmlspecialchars($task['Задача']); ?></span>
+                    <span class="checkbox__text"><?= htmlspecialchars($task['task_name']); ?></span>
                 </label>
             </td>
 
@@ -55,7 +55,7 @@
                 <a class="download-link" href="#">Home.psd</a>
             </td>
 
-            <td class="task__date"><?= $task['Дата выполнения'] ?></td>
+            <td class="task__date"><?= $task['task_deadline'] ?></td>
             </tr>
         <?php endforeach;?>
                     <!--показывать следующий тег <tr/>, если переменная $show_complete_tasks равна единице-->
