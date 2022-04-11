@@ -142,3 +142,26 @@ function include_template($name, array $data = []) {
 
     return $result;
 }
+
+function count_tasks_in_project(array $tasks, $project) {
+    # Подсчет количества задач в проекте
+    $count = 0;
+    foreach ($tasks as $task) {
+        if($task['project_name'] == $project) {
+            $count++;
+        }
+    }
+    return $count;
+}
+
+function output_error_sql($link) {
+    # вывод ошибки запроса в базу данных
+    $error = mysqli_error($link);
+    $content = include_template('error.php', ['error' => $error]);
+    $layout_content = include_template('layout.php', [
+        'content' => $content,
+        'title' => 'Дела в порядке'
+    ]);
+    print($layout_content);
+    exit;
+}

@@ -129,3 +129,112 @@ UPDATE tasks
 UPDATE tasks
    SET task_name = 'Собеседование в ИТ компании'
  WHERE task_id = 1;
+
+
+-- Запрос на добавление нового пользователя 'Константин'
+
+ INSERT INTO users (user_date_add, user_email, user_name, user_password) 
+     VALUES ('2022-02-15 10:31:25', 'konst@imail.ru', 'Константин', '$2y$10$PVMR6YEMtQ.2Uw3qm.dDMud9GF.KDoRRKgTAZSVSGXKKK0Se8OK4S'),
+;
+
+-- Запрос на добавление проектов пользователя 'Константин'
+
+INSERT INTO projects (project_name, user_id)
+     VALUES ('Входящие', 4),
+	  ('Учеба', 4),
+	  ('Работа', 4),
+	  ('Домашние дела', 4),
+	  ('Авто', 4);
+
+
+-- Запрос на добавление задачи 'Поиск подходящих вакансий' пользователя 'Константин'
+INSERT INTO tasks (task_date_create, task_status, task_name, task_deadline, user_id, project_id) 
+     VALUES ('2022-02-16 16:50:13', 1, 'Поиск подходящих вакансий', '2022-02-25 00:00:00', 4,
+            (SELECT project_id
+               FROM projects
+              WHERE user_id = 4
+                AND project_name = 'Работа'
+            )
+       );
+
+-- Запрос на добавление задачи 'Составить резюме' пользователя 'Константин'
+INSERT INTO tasks (task_date_create, task_status, task_name, task_deadline, user_id, project_id) 
+     VALUES ('2022-02-16 18:00:23', 1, 'Составить резюме', '2022-02-20 00:00:00', 4,
+            (SELECT project_id
+               FROM projects
+              WHERE user_id = 4
+                AND project_name = 'Работа'
+            )
+       );
+
+
+
+-- Запрос на добавление задачи 'Встреча с другом' пользователя 'Константин'
+INSERT INTO tasks (task_date_create, task_status, task_name, task_deadline, user_id, project_id) 
+VALUES ('2022-03-01 19:44:07', 0, 'Встреча с другом', '2020-03-07 19:00:00', 4,
+            (SELECT project_id
+               FROM projects
+              WHERE user_id = 4
+                AND project_name = 'Входящие'
+            )
+       );
+
+-- Запрос на добавление задачи 'Собеседование в IT компании' пользователя 'Константин'
+INSERT INTO tasks (task_date_create, task_status, task_name, task_deadline, user_id, project_id) 
+VALUES ('2022-03-10 19:44:07', 1, 'Собеседование в IT компании', '2022-03-11 12:00:00', 4,
+            (SELECT project_id
+               FROM projects
+              WHERE user_id = 4
+                AND project_name = 'Работа'
+            )
+       );	 
+
+-- Запрос на добавление задачи 'Выполнить тестовое задание' пользователя 'Константин'
+INSERT INTO tasks (task_date_create, task_status, task_name, task_deadline, user_id, project_id) 
+     VALUES ('2022-03-12 16:32:55', 1, 'Выполнить тестовое задание', '2022-03-19 00:00:00', 4,
+            (SELECT project_id
+               FROM projects
+              WHERE user_id = 4
+                AND project_name = 'Работа'
+            )
+       );
+
+-- Запрос на добавление задачи 'Сделать задание второго раздела' пользователя 'Константин'
+INSERT INTO tasks (task_date_create, task_status, task_name, task_deadline, user_id, project_id) 
+     VALUES ('2022-04-02 10:25:17', 0, 'Сделать задание первого раздела', '2022-04-20 00:00:00', 4,
+            (SELECT project_id
+               FROM projects
+              WHERE user_id = 4
+                AND project_name = 'Учеба'
+            )
+       );
+
+-- Запрос на добавление задачи 'Встреча с другом' пользователя 'Константин'
+INSERT INTO tasks (task_date_create, task_status, task_name, task_deadline, user_id, project_id) 
+     VALUES ('2022-04-08 10:08:00', 0, 'Встреча с другом', '2022-04-17 19:00:00', 4,
+            (SELECT project_id
+               FROM projects
+              WHERE user_id = 4
+                AND project_name = 'Входящие'
+            )
+       );
+
+-- Запрос на добавление задачи 'Купить корм для кота' пользователя 'Константин'
+INSERT INTO tasks (task_date_create, task_status, task_name, task_deadline, user_id, project_id) 
+     VALUES ('2022-04-09 20:21:41', 0, 'Купить корм для кота', '2022-04-14 00:00:00', 4,
+            (SELECT project_id
+               FROM projects
+              WHERE user_id = 4
+                AND project_name = 'Домашние дела'
+            )
+       );
+
+-- Запрос на добавление задачи 'Записаться на ТО' пользователя 'Константин'
+INSERT INTO tasks (task_date_create, task_status, task_name, task_deadline, user_id, project_id) 
+     VALUES ('2022-04-10 10:23:31', 0, 'Записаться на ТО', '2022-04-15 00:00:00', 4,
+            (SELECT project_id
+               FROM projects
+              WHERE user_id = 4
+                AND project_name = 'Авто'
+            )
+       );
