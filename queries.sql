@@ -191,7 +191,7 @@ VALUES ('2022-03-10 19:44:07', 1, 'Собеседование в IT компан
 
 -- Запрос на добавление задачи 'Выполнить тестовое задание' пользователя 'Константин'
 INSERT INTO tasks (task_date_create, task_status, task_name, task_deadline, user_id, project_id) 
-     VALUES ('2022-02-12 16:32:55', 1, 'Выполнить тестовое задание', '2022-02-19 00:00:00', 4,
+     VALUES ('2022-03-12 16:32:55', 1, 'Выполнить тестовое задание', '2022-03-19 00:00:00', 4,
             (SELECT project_id
                FROM projects
               WHERE user_id = 4
