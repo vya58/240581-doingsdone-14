@@ -4,7 +4,6 @@ require_once('init.php');
 
 if (!$link) {
     $error = mysqli_connect_error();
-    #$content = 'Ошибка соединения с базой данных: ';
     $content = include_template('error.php', ['error' => $error]);
     $layout_content = include_template('layout.php', [
         'content' => $content,
