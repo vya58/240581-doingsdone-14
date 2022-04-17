@@ -162,7 +162,7 @@ function output_error_sql($link) {
  * @param $sql string SQL запрос с плейсхолдерами вместо значений
  * @param array $data Данные для вставки на место плейсхолдеров
  *
- * @return mysqli_stmt_get_result результат выполнения подготовленного запроса
+ * @return mysqli_result результат выполнения подготовленного запроса
  */
 function get_result_prepare_sql($link, $sql, $data = []) {
     $stmt = mysqli_prepare($link, $sql);
