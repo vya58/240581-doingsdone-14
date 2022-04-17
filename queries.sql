@@ -134,8 +134,7 @@ UPDATE tasks
 -- Запрос на добавление нового пользователя 'Константин'
 
  INSERT INTO users (user_date_add, user_email, user_name, user_password) 
-     VALUES ('2022-02-15 10:31:25', 'konst@imail.ru', 'Константин', '$2y$10$PVMR6YEMtQ.2Uw3qm.dDMud9GF.KDoRRKgTAZSVSGXKKK0Se8OK4S'),
-;
+     VALUES ('2022-02-15 10:31:25', 'konst@imail.ru', 'Константин', '$2y$10$PVMR6YEMtQ.2Uw3qm.dDMud9GF.KDoRRKgTAZSVSGXKKK0Se8OK4S');
 
 -- Запрос на добавление проектов пользователя 'Константин'
 
