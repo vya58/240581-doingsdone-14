@@ -7,8 +7,8 @@ $user = intval(4);
 // показывать или нет выполненные задачи
 $show_complete_tasks = rand(0, 1);
  
-// Запрос в БД списка категорий с помощью подготовленных выражений
-$sql = "SELECT project_name, projects.project_id, COUNT(task_name) AS count_tasks FROM projects INNER JOIN tasks ON tasks.project_id = projects.project_id WHERE projects.user_id = ? GROUP BY project_name, projects.project_id";
+// Запрос в БД списка проектов и количества задач в каждом из них
+$sql = "SELECT project_name, p.project_id, COUNT(task_name) AS count_tasks FROM projects p INNER JOIN tasks t ON t.project_id = p.project_id WHERE p.user_id = ? GROUP BY project_name, p.project_id";
 $stmt = mysqli_prepare($link, $sql);
 mysqli_stmt_bind_param($stmt, 'i', $user);
 mysqli_stmt_execute($stmt);
@@ -25,9 +25,9 @@ $project_id  = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
 
 // Запрос к БД на получение списка задач
 if ($project_id) {// Запрос к БД на получение списка задач в выбранном проекте
-    $sql = "SELECT task_name, task_deadline, project_name, task_status FROM tasks "
-     . "INNER JOIN projects ON tasks.project_id = projects.project_id "
-     . "WHERE tasks.user_id = ? AND tasks.project_id = ? ORDER BY task_date_create";
+    $sql = "SELECT task_name, task_deadline, project_name, task_status FROM tasks t "
+     . "INNER JOIN projects p ON t.project_id = p.project_id "
+     . "WHERE t.user_id = ? AND t.project_id = ? ORDER BY task_date_create";
     $stmt = mysqli_prepare($link, $sql);
     mysqli_stmt_bind_param($stmt, 'ii', $user, $project_id);
     mysqli_stmt_execute($stmt);
@@ -37,7 +37,7 @@ if ($project_id) {// Запрос к БД на получение списка �
         output_error_sql($link);
     }
 
-    // Проверка существования id проекта в полученном запросе
+    // Вывод ошибки 404 при несуществующем id проекта в полученном запросе
     $existence_project = mysqli_num_rows($result);
     if (!$existence_project) {
         $content = include_template('404.php', [
@@ -54,9 +54,9 @@ if ($project_id) {// Запрос к БД на получение списка �
 }
     
 } else {// Запрос к БД на получение списка всех задач пользователя
-    $sql = "SELECT task_name, task_deadline, project_name, task_status FROM tasks "
-     . "INNER JOIN projects ON tasks.project_id = projects.project_id "
-     . "WHERE tasks.user_id = ? ORDER BY task_date_create";
+    $sql = "SELECT task_name, task_deadline, project_name, task_status FROM tasks t "
+     . "INNER JOIN projects p ON t.project_id = p.project_id "
+     . "WHERE t.user_id = ? ORDER BY task_date_create";
     $stmt = mysqli_prepare($link, $sql);
     mysqli_stmt_bind_param($stmt, 'i', $user);
     mysqli_stmt_execute($stmt);
