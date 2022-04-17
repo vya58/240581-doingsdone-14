@@ -37,12 +37,9 @@ if ($project_id) {// Запрос к БД на получение списка �
     // Вывод ошибки 404 при несуществующем id проекта в полученном запросе
     $existence_project = mysqli_num_rows($sql_result);
     if (!$existence_project) {
-        $content = include_template('404.php', [
-            'projects' => $projects,
-            'project_id' => $project_id
-        ]);
+        $content = include_template('404.php');
 
-    $layoutContent = include_template('layout.php',[
+        $layoutContent = include_template('layout.php',[
         'content' => $content,
         'title' => 'Дела в порядке'
     ]);
