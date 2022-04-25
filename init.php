@@ -21,3 +21,5 @@ if (!$link) {
 
 $projects = [];
 $content = '';
+// Разрешённые для загрузки типы файлов
+$permitted_file_extensions = array('bmp', 'jpg', 'jpeg', 'gif', 'png', 'svg', 'tiff', 'psd', 'djvu', 'mp4a', 'mpga', 'wma', 'mp4', 'mpeg', 'webm', 'wmv', 'avi', 'html', 'txt', 'rtx', 'epub', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'zip', 'txt', 'xls', 'doc');

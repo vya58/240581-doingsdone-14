@@ -13,11 +13,13 @@
  *
  * @return bool true при совпадении с форматом 'ГГГГ-ММ-ДД', иначе false
  */
-function is_date_valid(string $date) : bool {
-    $format_to_check = 'Y-m-d';
+function is_date_valid(string $date) {
+    $format_to_check = 'YYYY-mm-dd';
     $dateTimeObj = date_create_from_format($format_to_check, $date);
-
-    return $dateTimeObj !== false && array_sum(date_get_last_errors()) === 0;
+    if ($dateTimeObj !== false && array_sum(date_get_last_errors()) === 0) {
+        return 'Введите дату в формате «ГГГГ-ММ-ДД»';
+    }
+    return false;
 }
 
 /**
@@ -203,7 +205,36 @@ function get_result_prepare_sql($link, $sql, $data = []) {
             return false;
         }
     }
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    return $result;
+    $result = mysqli_stmt_execute($stmt);
+    if (false === $result) {
+        output_error_sql($link);
+    }
+    
+    return mysqli_stmt_get_result($stmt);
 }
+
+function get_post_val($name) {
+    return filter_input(INPUT_POST, $name);
+}
+
+
+// Проверка проекта по его id на наличие в списке проектов пользователя
+function is_project_valid($id, $allowed_list) {
+    if (!in_array($id, $allowed_list)) {
+        return 'Указан несуществующий проект';
+    }
+    return null;
+}
+
+// Проверка соответсвия длины строки на min и max допустимое значение
+function is_length_valid($value, $max) {
+    if ($value) {
+        $len = strlen($value);
+        if ($len > $max) {
+            return 'Максимальное количество символов не должно быть более $max';
+        } else {
+            return null;
+        }
+    } else return 'Поле должно быть заполнено';
+}
+

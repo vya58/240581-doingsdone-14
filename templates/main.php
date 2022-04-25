@@ -52,7 +52,8 @@
             </td>
 
             <td class="task__file">
-                <a class="download-link" href="#">Home.psd</a>
+                <?php if (null !== $task['task_file']): $task_file = $task['task_file']; else: $task_file = 'Home.psd'; endif?>
+                <a class="download-link" href="uploads/<?= $task['task_file'] ?>" target="_blank"><?= $task_file; ?></a>
             </td>
 
             <td class="task__date"><?= $task['task_deadline'] ?></td>

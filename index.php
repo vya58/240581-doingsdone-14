@@ -6,11 +6,12 @@ require_once('init.php');
 $user = intval(4);
 // показывать или нет выполненные задачи
 $show_complete_tasks = rand(0, 1);
-$data = [$user];
+
+$sql_data = [$user];
 // Запрос в БД списка проектов и количества задач в каждом из них
 $sql = "SELECT project_name, p.project_id, COUNT(task_name) AS count_tasks FROM projects p INNER JOIN tasks t ON t.project_id = p.project_id WHERE p.user_id = ? GROUP BY project_name, p.project_id";
 
-$sql_result = get_result_prepare_sql($link, $sql, $data);
+$sql_result = get_result_prepare_sql($link, $sql, $sql_data);
 
 if (!$sql_result) {
     output_error_sql($link);
@@ -27,8 +28,8 @@ if ($project_id) {// Запрос к БД на получение списка �
      . "INNER JOIN projects p ON t.project_id = p.project_id "
      . "WHERE t.user_id = ? AND t.project_id = ? ORDER BY task_date_create";
     
-    $data = [$user, $project_id];
-    $sql_result = get_result_prepare_sql($link, $sql, $data);
+    $sql_data = [$user, $project_id];
+    $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
 
     if (!$sql_result) {
         output_error_sql($link);
@@ -49,12 +50,12 @@ if ($project_id) {// Запрос к БД на получение списка �
 }
     
 } else {// Запрос к БД на получение списка всех задач пользователя
-    $sql = "SELECT task_name, task_deadline, project_name, task_status FROM tasks t "
+    $sql = "SELECT task_name, task_deadline, project_name, task_status, task_file FROM tasks t "
      . "INNER JOIN projects p ON t.project_id = p.project_id "
      . "WHERE t.user_id = ? ORDER BY task_date_create";
 
-    $data = [$user];
-    $sql_result = get_result_prepare_sql($link, $sql, $data);
+    $sql_data = [$user];
+    $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
 
     if (!$sql_result) {
         output_error_sql($link);
