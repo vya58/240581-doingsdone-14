@@ -82,10 +82,9 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($file_size > 2097152) {
         $errors['file'] = 'Превышен максимальный размер файла';
     }
-//Переименование и сохранение файла
-    $file_name = uniqid() . "." . $file_extension;
 
-    move_uploaded_file($tmp_name, 'uploads/' . $file_name);
+//Переименование файла
+    $file_name = uniqid() . "." . $file_extension;
 
     $task['task_file'] = $file_name;
 //Если файл пользователем не загружен, устанавливаем null
@@ -121,6 +120,9 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     $sql_result = mysqli_stmt_get_result($stmt);
+
+    //Cохранение файла
+    move_uploaded_file($tmp_name, 'uploads/' . $file_name);
 //Переадресация пользователя на главную страницу после успешного добавления новой задачи
     if (false === $sql_result) {
         
