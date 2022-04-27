@@ -169,7 +169,7 @@ function output_error_sql($link) {
 function get_result_prepare_sql($link, $sql, $data = []) {
     $stmt = mysqli_prepare($link, $sql);
 
-    if ($stmt === false) {
+    if (false === $stmt) {
         return false;
     }
     
@@ -205,9 +205,11 @@ function get_result_prepare_sql($link, $sql, $data = []) {
             return false;
         }
     }
+
     $result = mysqli_stmt_execute($stmt);
+
     if (false === $result) {
-        output_error_sql($link);
+        return false;
     }
     
     return mysqli_stmt_get_result($stmt);
@@ -232,9 +234,56 @@ function is_length_valid($value, $max) {
         $len = strlen($value);
         if ($len > $max) {
             return 'Максимальное количество символов не должно быть более $max';
-        } else {
-            return null;
         }
-    } else return 'Поле должно быть заполнено';
+        return null;
+    }  
 }
 
+
+/* Подготавливает SQL выражение к выполнению
+$link mysqli - Ресурс соединения
+$sql string - SQL запрос с плейсхолдерами вместо значений
+array $data - Данные для вставки на место плейсхолдеров
+*/
+function get_prepare_stmt($link, $sql, $data = []) {
+    $stmt = mysqli_prepare($link, $sql);
+
+    if (false === $stmt) {
+        return false;
+    }
+    
+    if ($data) {
+        $types = '';
+        $stmt_data = [];
+
+        foreach ($data as $value) {
+            $type = 's';
+
+            if (is_int($value)) {
+                $type = 'i';
+            }
+            else if (is_string($value)) {
+                $type = 's';
+            }
+            else if (is_double($value)) {
+                $type = 'd';
+            }
+
+            if ($type) {
+                $types .= $type;
+                $stmt_data[] = $value;
+            }
+        }
+
+        $values = array_merge([$stmt, $types], $stmt_data);
+
+        $func = 'mysqli_stmt_bind_param';
+        $func(...$values);
+
+        if (mysqli_errno($link) > 0) {
+            return false;
+        }
+    }
+
+    return $stmt;
+}

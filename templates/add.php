@@ -15,12 +15,12 @@
 <div class="page-wrapper">
   <div class="container container--with-sidebar">
     <header class="main-header">
-      <a href="#">
+      <a href="index.php">
         <img src="../img/logo.png" width="153" height="42" alt="Логитип Дела в порядке">
       </a>
 
       <div class="main-header__side">
-        <a class="main-header__side-item button button--plus" href="add2.php">Добавить задачу</a>
+        <a class="main-header__side-item button button--plus" href="add.php">Добавить задачу</a>
 
         <div class="main-header__side-item user-menu">
           <div class="user-menu__data">
@@ -52,55 +52,60 @@
 
       <main class="content__main">
         <h2 class="content__main-heading">Добавление задачи</h2>
-
+        <!--Форма добавления новой задачи-->
         <form class="form"  action="add.php" method="post" autocomplete="off" enctype="multipart/form-data">
           <div class="form__row">
             <label class="form__label" for="name">Название <sup>*</sup></label>
-            <?php $classname = isset($errors['name']) ? "form__input--error" : "";?>
+            <!--Вывод тега <p> с сообщением об ошибке заполнения поля 'name' -->
             <?php if (isset($errors['name'])): ?>
               <p class="form__message">
                 <strong><?= $errors['name']; ?></strong>
               </p>
             <?php endif; ?>
-            <input class="form__input" type="text" name="name" id="name" value="<?= get_post_val('name'); ?>" placeholder="Введите название">
+            <?php $classname = isset($errors['name']) ? "form__input--error" : "";?>
+            <input class="form__input <?= $classname; ?>" type="text" name="name" id="name" value="<?= get_post_val('name'); ?>" placeholder="Введите название">
           </div>
 
           <div class="form__row">
             <label class="form__label" for="project">Проект <sup>*</sup></label>
+            <!--Вывод тега <p> с сообщением об ошибке заполнения поля 'project' -->
             <?php $classname = isset($errors['project']) ? "form__input--error" : "";?>
             <?php if (isset($errors['project'])): ?>
               <p class="form__message">
                 <strong><?= $errors['project']; ?></strong>
               </p>
             <?php endif; ?>
-            <select class="form__input form__input--select" name="project" id="project">
+            <select class="form__input form__input--select <?= $classname; ?>" name="project" id="project">
                 <?php foreach ($projects as $project): $project_name = $project['project_name']; ?>
-                <option value="<?= $project['project_id']; ?>"><?= htmlspecialchars($project_name); ?></option>
+                <option value="<?= $project['project_id']; ?>"<?php if(get_post_val('project') == $project['project_id']) echo " selected"; ?>><?= htmlspecialchars($project_name); ?></option>
                 <?php endforeach; ?>
             </select>
           </div>
 
           <div class="form__row">
             <label class="form__label" for="date">Дата выполнения</label>
+            <!--Вывод тега <p> с сообщением об ошибке заполнения поля 'date' -->
             <?php $classname = isset($errors['date']) ? "form__input--error" : "";?>
             <?php if (isset($errors['date'])): ?>
               <p class="form__message">
                 <strong><?= $errors['date']; ?></strong>
               </p>
             <?php endif; ?>
-            <input class="form__input form__input--date" type="text" name="date" id="date" value="" placeholder="Введите дату в формате ГГГГ-ММ-ДД">
+            <input class="form__input form__input--date <?= $classname; ?>" type="text" name="date" id="date" value="<?= get_post_val('date'); ?>" placeholder="Введите дату в формате ГГГГ-ММ-ДД">
           </div>
 
           <div class="form__row">
             <label class="form__label" for="file">Файл</label>
-
             <div class="form__input-file">
-              <input class="visually-hidden" type="file" name="file" id="file" value="">
+              <!--Вывод сообщения об ошибке заполнения поля загрузки файла -->
+              <?php $classname = isset($errors['file']) ? "form__input--error" : "";?>
+              <input class="visually-hidden <?= $classname ?>" type="file" name="file" id="file" value="">
               <?php if (isset($errors['file'])): ?>
-              <p class="form__message">
-                <strong><?= $errors['file']; ?></strong>
-              </p>
-            <?php endif; ?>
+                <p class="form__message">
+                  <strong><?= $errors['file']; ?></strong>
+                </p>
+              <?php endif; ?>
+
               <label class="button button--transparent" for="file">
                 <span>Выберите файл</span>
               </label>
