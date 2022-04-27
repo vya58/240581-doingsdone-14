@@ -23,9 +23,8 @@ $projects = [];
 $content = '';
 // Устанавливаем id пользователя
 $user = intval(4);
-// Разрешённые для загрузки типы файлов
-$permitted_file_extensions = array('bmp', 'jpg', 'jpeg', 'gif', 'png', 'svg', 'tiff', 'psd', 'djvu', 'mp4a', 'mpga', 'wma', 'mp4', 'mpeg', 'webm', 'wmv', 'avi', 'html', 'txt', 'rtx', 'epub', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'zip', 'txt', 'xls', 'doc');
 
+// Разрешённые для загрузки типы файлов
 $mime_types = array(
 
     'txt' => 'text/plain',
