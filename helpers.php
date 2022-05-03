@@ -158,7 +158,8 @@ function output_error_sql($link) {
 }
 
 /**
- * Выдаёт результат подготовленного выражения на основе готового SQL запроса и переданных данных
+ * Для запросов SELECT!
+ * Выдаёт результат подготовленного выражения на основе SQL запроса на чтение из ДБ и переданных данных
  *
  * @param $link mysqli Ресурс соединения
  * @param $sql string SQL запрос с плейсхолдерами вместо значений
@@ -229,23 +230,42 @@ function is_project_valid($id, $allowed_list) {
 }
 
 // Проверка соответсвия длины строки на min и max допустимое значение
-function is_length_valid($value, $max) {
+function is_length_valid($value, $min, $max) {
     if ($value) {
         $len = strlen($value);
+        if ($len < $min) {
+            return "Минимальное количество символов должно быть больше $min";
+        }
         if ($len > $max) {
-            return 'Максимальное количество символов не должно быть более $max';
+            return "Максимальное количество символов должно быть меньше $max";
         }
         return null;
     }  
 }
 
+// Проверка, что email не занят и корректен
+function is_email_valid($value, $emails) {
+    if (!$value) {
+        return 'Поле "e-mail" должно быть заполнено!';
+    }
+    $value = filter_var($value, FILTER_VALIDATE_EMAIL);
+    if (!$value) {
+        return 'E-mail введён некорректно.';
+    }
+    if (in_array($value, $emails)) {
+        return 'Указанный e-mail уже используется другим пользователем.';
+    }
+    return null;
+}
 
-/* Подготавливает SQL выражение к выполнению
+/* 
+Для запросов INSERT, UPDATE, DELETE!
+Подготавливает SQL выражение к выполнению
 $link mysqli - Ресурс соединения
 $sql string - SQL запрос с плейсхолдерами вместо значений
 array $data - Данные для вставки на место плейсхолдеров
 */
-function get_prepare_stmt($link, $sql, $data = []) {
+function get_prepare_stmt($link, $sql,  array $data = []) {
     $stmt = mysqli_prepare($link, $sql);
 
     if (false === $stmt) {

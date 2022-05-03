@@ -9,19 +9,7 @@ $sql_data = [$user];
 // Запрос в БД списка проектов и количества задач в каждом из них
 $sql = "SELECT project_name, p.project_id, COUNT(task_name) AS count_tasks FROM projects p INNER JOIN tasks t ON t.project_id = p.project_id WHERE p.user_id = ? GROUP BY project_name, p.project_id";
 
-$stmt = get_prepare_stmt($link, $sql, $sql_data);
-
-if (false === $stmt) {
-    output_error_sql($link);
-}
-
-$result = mysqli_stmt_execute($stmt);
-
-if (false === $result) {
-    output_error_sql($link);
-}
-
-$sql_result = mysqli_stmt_get_result($stmt);
+$sql_result = get_result_prepare_sql($link, $sql, $sql_data);
 
 $projects = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 
@@ -35,25 +23,12 @@ if ($project_id) {// Запрос к БД на получение списка �
      . "WHERE t.user_id = ? AND t.project_id = ? ORDER BY task_date_create";
     
     $sql_data = [$user, $project_id];
-    $stmt = get_prepare_stmt($link, $sql, $sql_data);
-
-    if (false === $stmt) {
-        output_error_sql($link);
-    }
-
-    $result = mysqli_stmt_execute($stmt);
-
-    if (false === $result) {
-        output_error_sql($link);
-    }
-
-    $sql_result = mysqli_stmt_get_result($stmt);
+    $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
 
     // Вывод ошибки 404 при несуществующем id проекта в полученном запросе
     $existence_project = mysqli_num_rows($sql_result);
     if (!$existence_project) {
         $content = include_template('404.php');
-
         $layoutContent = include_template('layout.php',[
         'content' => $content,
         'title' => 'Дела в порядке'
@@ -69,19 +44,7 @@ if ($project_id) {// Запрос к БД на получение списка �
      . "WHERE t.user_id = ? ORDER BY task_date_create";
 
     $sql_data = [$user];
-    $stmt = get_prepare_stmt($link, $sql, $sql_data);
-
-    if (false === $stmt) {
-        output_error_sql($link);
-    }
-
-    $result = mysqli_stmt_execute($stmt);
-
-    if (false === $result) {
-        output_error_sql($link);
-    }
-
-    $sql_result = mysqli_stmt_get_result($stmt);
+    $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
 }
 
 $tasks = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);

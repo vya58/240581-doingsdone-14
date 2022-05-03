@@ -4,7 +4,7 @@ require_once('init.php');
 // Запрос в БД списка проектов и количества задач в каждом из них с помощью подготовленных выражений
 $sql_data = [$user];
 $sql = "SELECT project_name, p.project_id, COUNT(task_name) AS count_tasks FROM projects p INNER JOIN tasks t ON t.project_id = p.project_id WHERE p.user_id = ? GROUP BY project_name, p.project_id";
-
+/*
 $stmt = get_prepare_stmt($link, $sql, $sql_data);
 
 if (false === $stmt) {
@@ -18,6 +18,9 @@ if (false === $result) {
 }
 
 $sql_result = mysqli_stmt_get_result($stmt);
+*/
+
+$sql_result = get_result_prepare_sql($link, $sql, $sql_data);
 
 $projects = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 $project_ids = array_column($projects, 'project_id');
@@ -27,7 +30,7 @@ $errors = [];
 //Массив с функциями для валидации полей формы запроса
 $rules = [
     'name' => function($value) {
-        return is_length_valid($value, 50);
+        return is_length_valid($value, 0, 5);
     },
     'project' => function($value) use ($project_ids) {
         return is_project_valid($value, $project_ids);

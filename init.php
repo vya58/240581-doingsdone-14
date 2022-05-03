@@ -3,6 +3,7 @@
 require_once('helpers.php');
 
 $db = require_once('db.php');
+
 // Подключение к БД
 $link = mysqli_connect($db['host'], $db['user'], $db['password'], $db['database']);
 mysqli_set_charset($link, "utf8");
@@ -21,8 +22,9 @@ if (!$link) {
 
 $projects = [];
 $content = '';
+
 // Устанавливаем id пользователя
-$user = intval(4);
+$user = intval(5);
 
 // Разрешённые для загрузки типы файлов
 $mime_types = array(
