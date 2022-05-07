@@ -16,7 +16,7 @@ $errors = [];
 //Массив с функциями для валидации полей формы запроса
 $rules = [
     'name' => function($value) {
-        return validate_field_length($value, 0, 5);
+        return validate_field_length($value, 0, 50);
     },
     'project' => function($value) use ($project_ids) {
         return validate_project($value, $project_ids);
