@@ -120,7 +120,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 //Подключение шаблона с формой
 $form_content = include_template('add.php', [
     'projects' => $projects,
-    'title' => 'Document'
+    'title' => 'Document',
+    'user' => $user
 ]); 
 
 print($form_content);
