@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 require_once('helpers.php');
 
 $db = require_once('db.php');
@@ -23,12 +23,15 @@ if (!$link) {
 $projects = [];
 $content = '';
 
-// Устанавливаем id и имя пользователя по умолчанию
-#$user = intval(4);
-$user = array(
-    'user_id' => false,
-    'user_name' => false
-);
+// Устанавливаем id и имя пользователя
+if (isset($_SESSION['user_id'])) {
+    $user['user_id'] = $_SESSION['user_id'];
+    $user['user_name'] = $_SESSION['user_name'];
+} else {
+    $user['user_id'] = false;
+    $user['user_name'] = false;
+}
+
 
 // Разрешённые для загрузки типы файлов
 $mime_types = array(

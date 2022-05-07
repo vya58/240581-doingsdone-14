@@ -1,12 +1,6 @@
 <?php
-session_start();
 
 require_once('init.php');
-
-if (isset($_SESSION['user_id'])) {
-    $user['user_id'] = $_SESSION['user_id'];
-    $user['user_name'] = $_SESSION['user_name'];
-}
 
 //Подключение лейаута для анонимного посетителя
 if (!$user['user_id']) {

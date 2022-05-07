@@ -1,7 +1,7 @@
 <?php
-session_start();
 
 require_once('init.php');
+
 // Запрос в БД списка проектов и количества задач в каждом из них с помощью подготовленных выражений
 $sql_data = [$user['user_id']];
 $sql = "SELECT project_name, p.project_id, COUNT(task_name) AS count_tasks FROM projects p INNER JOIN tasks t ON t.project_id = p.project_id WHERE p.user_id = ? GROUP BY project_name, p.project_id";
@@ -80,6 +80,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         $form_content = include_template('add.php', [
             'projects' => $projects,
             'title' => 'Document',
+            'user' => $user,
             'errors' => $errors
         ]);
         print($form_content);
