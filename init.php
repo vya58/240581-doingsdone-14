@@ -23,8 +23,12 @@ if (!$link) {
 $projects = [];
 $content = '';
 
-// Устанавливаем id пользователя
-$user = intval(5);
+// Устанавливаем id и имя пользователя по умолчанию
+#$user = intval(4);
+$user = array(
+    'user_id' => false,
+    'user_name' => false
+);
 
 // Разрешённые для загрузки типы файлов
 $mime_types = array(

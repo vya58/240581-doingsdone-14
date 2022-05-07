@@ -1,11 +1,31 @@
 <?php
+session_start();
 
 require_once('init.php');
+
+if (isset($_SESSION['user_id'])) {
+    $user['user_id'] = $_SESSION['user_id'];
+    $user['user_name'] = $_SESSION['user_name'];
+}
+
+//Подключение лейаута для анонимного посетителя
+if (!$user['user_id']) {
+    $guest_content = include_template('guest.php');                                         
+    
+    $layout_content = include_template('layout.php', [
+        'content' => $guest_content,
+        'title' => 'Дела в порядке',
+        'user' => $user
+    ]);
+    
+    print($layout_content);
+    exit;
+}
 
 // показывать или нет выполненные задачи
 $show_complete_tasks = rand(0, 1);
 
-$sql_data = [$user];
+$sql_data = [$user['user_id']];
 // Запрос в БД списка проектов и количества задач в каждом из них
 $sql = "SELECT project_name, p.project_id, COUNT(task_name) AS count_tasks FROM projects p INNER JOIN tasks t ON t.project_id = p.project_id WHERE p.user_id = ? GROUP BY project_name, p.project_id";
 
@@ -22,7 +42,7 @@ if ($project_id) {// Запрос к БД на получение списка �
      . "INNER JOIN projects p ON t.project_id = p.project_id "
      . "WHERE t.user_id = ? AND t.project_id = ? ORDER BY task_date_create";
     
-    $sql_data = [$user, $project_id];
+    $sql_data = [$user['user_id'], $project_id];
     $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
 
     // Вывод ошибки 404 при несуществующем id проекта в полученном запросе
@@ -43,7 +63,7 @@ if ($project_id) {// Запрос к БД на получение списка �
      . "INNER JOIN projects p ON t.project_id = p.project_id "
      . "WHERE t.user_id = ? ORDER BY task_date_create";
 
-    $sql_data = [$user];
+    $sql_data = [$user['user_id']];
     $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
 }
 
@@ -58,7 +78,8 @@ $main_content = include_template('main.php', [
 
 $layout_content = include_template('layout.php', [
     'content' => $main_content,
-    'title' => 'Дела в порядке'
+    'title' => 'Дела в порядке',
+    'user' => $user
 ]);
 
 print($layout_content);
