@@ -13,7 +13,7 @@
  *
  * @return bool true при совпадении с форматом 'ГГГГ-ММ-ДД', иначе false
  */
-function is_date_valid(string $date) {
+function validate_date(string $date) {
     $format_to_check = 'YYYY-mm-dd';
     $dateTimeObj = date_create_from_format($format_to_check, $date);
     if ($dateTimeObj !== false && array_sum(date_get_last_errors()) === 0) {
@@ -222,7 +222,7 @@ function get_post_val($name) {
 
 
 // Проверка проекта по его id на наличие в списке проектов пользователя
-function is_project_valid($id, $allowed_list) {
+function validate_project($id, $allowed_list) {
     if (!in_array($id, $allowed_list)) {
         return 'Указан несуществующий проект';
     }
@@ -230,7 +230,7 @@ function is_project_valid($id, $allowed_list) {
 }
 
 // Проверка соответсвия длины строки на min и max допустимое значение
-function is_length_valid($value, $min, $max) {
+function validate_field_length($value, $min, $max) {
     if ($value) {
         $len = strlen($value);
         if ($len < $min) {
@@ -240,20 +240,20 @@ function is_length_valid($value, $min, $max) {
             return "Максимальное количество символов должно быть меньше $max";
         }
         return null;
-    }  
+    }
+    return "Заполните поле!";
 }
 
-// Проверка, что email не занят и корректен
-function is_email_valid($value, $emails) {
+// Валидация email
+function validate_email($value) {
+    
     if (!$value) {
         return 'Поле "e-mail" должно быть заполнено!';
     }
+
     $value = filter_var($value, FILTER_VALIDATE_EMAIL);
     if (!$value) {
         return 'E-mail введён некорректно.';
-    }
-    if (in_array($value, $emails)) {
-        return 'Указанный e-mail уже используется другим пользователем.';
     }
     return null;
 }

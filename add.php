@@ -1,24 +1,10 @@
 <?php
 
 require_once('init.php');
+
 // Запрос в БД списка проектов и количества задач в каждом из них с помощью подготовленных выражений
-$sql_data = [$user];
+$sql_data = [$user['user_id']];
 $sql = "SELECT project_name, p.project_id, COUNT(task_name) AS count_tasks FROM projects p INNER JOIN tasks t ON t.project_id = p.project_id WHERE p.user_id = ? GROUP BY project_name, p.project_id";
-/*
-$stmt = get_prepare_stmt($link, $sql, $sql_data);
-
-if (false === $stmt) {
-    output_error_sql($link);
-}
-
-$result = mysqli_stmt_execute($stmt);
-
-if (false === $result) {
-    output_error_sql($link);
-}
-
-$sql_result = mysqli_stmt_get_result($stmt);
-*/
 
 $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
 
@@ -30,19 +16,18 @@ $errors = [];
 //Массив с функциями для валидации полей формы запроса
 $rules = [
     'name' => function($value) {
-        return is_length_valid($value, 0, 5);
+        return validate_field_length($value, 0, 50);
     },
     'project' => function($value) use ($project_ids) {
-        return is_project_valid($value, $project_ids);
+        return validate_project($value, $project_ids);
     },
     'date' => function($date) {
-        return is_date_valid($date);
+        return validate_date($date);
     }
 ];
 
 //Валидация данных, введённых в поля формы
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $required = [$_POST['name'], $_POST['project'], $_POST['date']];
  
     $task = filter_input_array(INPUT_POST, ['name' => FILTER_DEFAULT, 'project' => FILTER_DEFAULT, 'date' => FILTER_DEFAULT], true);
     
@@ -59,10 +44,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($_POST['date'] < date('Y-m-d') && null != $task['date']) {
         $errors['date'] = "Дата выполнения задачи не может быть ранее текущей!";
-    }
-
-    if (empty($_POST['name'])) {
-        $errors['name'] = "Необходимо добавить название задачи!";
     }
 
     $errors = array_filter($errors);
@@ -99,6 +80,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         $form_content = include_template('add.php', [
             'projects' => $projects,
             'title' => 'Document',
+            'user' => $user,
             'errors' => $errors
         ]);
         print($form_content);
@@ -106,7 +88,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
 //Формирование и выполнение SQL-запроса в БД, в случае успешной проверки формы, на добавление новой задачи
-    array_unshift($task, $user);
+    array_unshift($task, $user['user_id']);
    
     $sql = "INSERT INTO tasks (user_id, task_name, project_id, task_date_create, task_deadline, task_file) VALUES (?, ?, ?, now(), ?, ?);";
 
@@ -139,7 +121,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 //Подключение шаблона с формой
 $form_content = include_template('add.php', [
     'projects' => $projects,
-    'title' => 'Document'
+    'title' => 'Document',
+    'user' => $user
 ]); 
 
 print($form_content);
