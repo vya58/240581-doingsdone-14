@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Проверяет переданную дату на соответствие формату 'ГГГГ-ММ-ДД'
  *
@@ -13,7 +14,8 @@
  *
  * @return bool true при совпадении с форматом 'ГГГГ-ММ-ДД', иначе false
  */
-function validate_date(string $date) {
+function validate_date(string $date)
+{
     $format_to_check = 'YYYY-mm-dd';
     $dateTimeObj = date_create_from_format($format_to_check, $date);
     if ($dateTimeObj !== false && array_sum(date_get_last_errors()) === 0) {
@@ -31,7 +33,8 @@ function validate_date(string $date) {
  *
  * @return mysqli_stmt Подготовленное выражение
  */
-function db_get_prepare_stmt($link, $sql, $data = []) {
+function db_get_prepare_stmt($link, $sql, $data = [])
+{
     $stmt = mysqli_prepare($link, $sql);
 
     if ($stmt === false) {
@@ -48,11 +51,9 @@ function db_get_prepare_stmt($link, $sql, $data = []) {
 
             if (is_int($value)) {
                 $type = 'i';
-            }
-            else if (is_string($value)) {
+            } else if (is_string($value)) {
                 $type = 's';
-            }
-            else if (is_double($value)) {
+            } else if (is_double($value)) {
                 $type = 'd';
             }
 
@@ -98,7 +99,7 @@ function db_get_prepare_stmt($link, $sql, $data = []) {
  *
  * @return string Рассчитанная форма множественнго числа
  */
-function get_noun_plural_form (int $number, string $one, string $two, string $many): string
+function get_noun_plural_form(int $number, string $one, string $two, string $many): string
 {
     $number = (int) $number;
     $mod10 = $number % 10;
@@ -126,9 +127,11 @@ function get_noun_plural_form (int $number, string $one, string $two, string $ma
  * Подключает шаблон, передает туда данные и возвращает итоговый HTML контент
  * @param string $name Путь к файлу шаблона относительно папки templates
  * @param array $data Ассоциативный массив с данными для шаблона
+ * 
  * @return string Итоговый HTML
  */
-function include_template($name, array $data = []) {
+function include_template($name, array $data = [])
+{
     $name = 'templates/' . $name;
     $result = '';
 
@@ -145,7 +148,8 @@ function include_template($name, array $data = []) {
     return $result;
 }
 
-function output_error_sql($link) {
+function output_error_sql($link)
+{
     # вывод ошибки запроса в базу данных
     $error = mysqli_error($link);
     $content = include_template('error.php', ['error' => $error]);
@@ -167,13 +171,14 @@ function output_error_sql($link) {
  *
  * @return mysqli_result результат выполнения подготовленного запроса
  */
-function get_result_prepare_sql($link, $sql, $data = []) {
+function get_result_prepare_sql($link, $sql, $data = [])
+{
     $stmt = mysqli_prepare($link, $sql);
 
     if (false === $stmt) {
         return false;
     }
-    
+
     if ($data) {
         $types = '';
         $stmt_data = [];
@@ -183,11 +188,9 @@ function get_result_prepare_sql($link, $sql, $data = []) {
 
             if (is_int($value)) {
                 $type = 'i';
-            }
-            else if (is_string($value)) {
+            } else if (is_string($value)) {
                 $type = 's';
-            }
-            else if (is_double($value)) {
+            } else if (is_double($value)) {
                 $type = 'd';
             }
 
@@ -212,27 +215,80 @@ function get_result_prepare_sql($link, $sql, $data = []) {
     if (false === $result) {
         return false;
     }
-    
+
     return mysqli_stmt_get_result($stmt);
 }
 
-function get_post_val($name) {
+/**
+ *Фильтрация текстового поля, полученного из POST-запрося
+ *@param $name - фильтруемая строка
+ *
+ *@return - отфильтрованная строка
+ */
+function get_post_val($name)
+{
     return filter_input(INPUT_POST, $name);
 }
 
-
-// Проверка проекта по его id на наличие в списке проектов пользователя
-function validate_project($id, $allowed_list) {
+/**
+ *Проверка существования проекта в списке проектов пользователя по его id
+ *@param $id - id проекта
+ *@param array $allowed_list - массив с id проектов пользователя
+ *
+ *@return - текст ошибки или null
+ */
+function validate_project($id, $allowed_list)
+{
     if (!in_array($id, $allowed_list)) {
         return 'Указан несуществующий проект';
     }
     return null;
 }
 
-// Проверка соответсвия длины строки на min и max допустимое значение
-function validate_field_length($value, $min, $max) {
+/**
+ * Функция проверки занятости имени для нового проекта
+ * Реализована через дополнительный SQL-запрос из-за регистрозависимати PHP-функции "in_array()"
+ * @param $link mysqli Ресурс соединения
+ * @param array $user Массив с id пользователя
+ * @param $project_name Имя проекта
+ * @param $sql string SQL запрос с плейсхолдерами вместо значений
+ * @param array $data Данные для вставки на место плейсхолдеров
+ * 
+ * @return mysqli_result результат выполнения подготовленного запроса
+ */
+function validate_project_name($link, $user, $project_name)
+{
+    $sql_data = [
+        $user['user_id'],
+        $project_name
+    ];
+
+    $sql = "SELECT project_name FROM projects WHERE user_id = ? AND project_name = ?";
+
+    $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
+
+    $project_names = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
+
+    if ($project_names) {
+        return 'Такой проект уже существует';
+    }
+    return null;
+}
+
+/**
+ *Проверка соответсвия длины строки на min и max допустимое значение
+ *Использована функция "iconv_strlen", проверяющая количество симолов с учётом кодировки
+ *Проверяет на пустоту поля и корретность email
+ *@param $value - проверяемая строка
+ *@param $min - минимальное значение
+ *@param $max - максимальное значение
+ *
+ *@return - текст ошибки или null
+ */
+function validate_field_length($value, $min, $max)
+{
     if ($value) {
-        $len = strlen($value);
+        $len = iconv_strlen($value);
         if ($len < $min) {
             return "Минимальное количество символов должно быть больше $min";
         }
@@ -244,9 +300,15 @@ function validate_field_length($value, $min, $max) {
     return "Заполните поле!";
 }
 
-// Валидация email
-function validate_email($value) {
-    
+/**
+ *Валидация email
+ *Проверяет на пустоту поля и корретность email
+ *@param $value - email
+ *
+ *@return - текст ошибки или null
+ */
+function validate_email($value)
+{
     if (!$value) {
         return 'Поле "e-mail" должно быть заполнено!';
     }
@@ -258,20 +320,22 @@ function validate_email($value) {
     return null;
 }
 
-/* 
-Для запросов INSERT, UPDATE, DELETE!
-Подготавливает SQL выражение к выполнению
-$link mysqli - Ресурс соединения
-$sql string - SQL запрос с плейсхолдерами вместо значений
-array $data - Данные для вставки на место плейсхолдеров
-*/
-function get_prepare_stmt($link, $sql,  array $data = []) {
+/**
+ *Для запросов INSERT, UPDATE, DELETE!
+ *Подготавливает SQL выражение к выполнению
+ *@param $link mysqli - Ресурс соединения
+ *@param $sql string - SQL запрос с плейсхолдерами вместо значений
+ *
+ *@param array $data - Данные для вставки на место плейсхолдеров
+ */
+function get_prepare_stmt($link, $sql, array $data = [])
+{
     $stmt = mysqli_prepare($link, $sql);
 
     if (false === $stmt) {
         return false;
     }
-    
+
     if ($data) {
         $types = '';
         $stmt_data = [];
@@ -281,11 +345,9 @@ function get_prepare_stmt($link, $sql,  array $data = []) {
 
             if (is_int($value)) {
                 $type = 'i';
-            }
-            else if (is_string($value)) {
+            } else if (is_string($value)) {
                 $type = 's';
-            }
-            else if (is_double($value)) {
+            } else if (is_double($value)) {
                 $type = 'd';
             }
 
@@ -306,4 +368,78 @@ function get_prepare_stmt($link, $sql,  array $data = []) {
     }
 
     return $stmt;
+}
+
+/** 
+ * Подготовка дополнения к условию SQL-запроса к БД по дате для работы блока фильтров
+ * @param $filter - Переменная с номером фильтра из GET-запросаЖ
+ * - 1 - Все задачи;
+ * - 2 - Задачи на сегодня;
+ * - 3 - Задачи на завтра;
+ * - 4 - Просроченные задачи.
+ * 
+ * @return $sql_add - Строка с дополнением к условию запроса
+ */
+function preparation_insert_filtration($filter)
+{
+    $sql_add = "";
+
+    if (2 == $filter) {
+        $sql_add = "AND DATE(task_deadline) = CURDATE() ";
+    }
+    if (3 == $filter) {
+        $sql_add = "AND DATE(task_deadline) = DATE_ADD(CURDATE(), INTERVAL 1 DAY) ";
+    }
+    if (4 == $filter) {
+        $sql_add = "AND DATE(task_deadline) < CURDATE() ";
+    }
+    return $sql_add;
+}
+
+/** !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * Подключение layout.php
+ * @param $title - Атрибут title для <!DOCTYPE HTML>
+ * @param $user - Массив с id и именем пользователя
+ * @param $content - Подключаемая к layout страница
+ * 
+ * @return $layout_content Подготовленный для печати layout
+ */
+function include_layout($title, $user, $content)
+{
+    $layout_content = include_template('layout.php', [
+        'title' => $title,
+        'user' => $user,
+        'content' => $content
+    ]);
+    return $layout_content;
+}
+
+/** Функция mb_ucfirst предназначена для преобразования первой буквы строки в "ВЕРХНИЙ РЕГИСТР".
+ * Функция "ucfirst()" не использовалась, т.к. не работает с кириллицей
+ * Взято: https://dwweb.ru/page/php/function/081_mb_ucfirst_php.html
+ * @param $string - передаваемая строка
+ * 
+ * @return mb_strtoupper - Преобразованная строка
+ */
+
+function mb_ucfirst($string, $enc = 'UTF-8')
+{
+    return mb_strtoupper(mb_substr($string, 0, 1, $enc), $enc) . mb_substr($string, 1, mb_strlen($string, $enc), $enc);
+}
+
+/** Фильтрация получаемой от пользователя строки:
+ * - приводит к строчному типу;
+ * - убирает пробелы в начале и конце строки;
+ * - вычищает лишние пробелы в строке;
+ * - преобразует первый символ в верхний регистр
+ * @param $name - передаваемая строка
+ * 
+ * @return mb_strtoupper - Преобразованная строка
+ */
+function filter_string($name)
+{
+    $name = (string)$name;
+    $name = trim($name);
+    $name = preg_replace('/\s\s+/', ' ', $name);
+    return mb_ucfirst($name);
 }
