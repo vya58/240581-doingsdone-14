@@ -63,7 +63,7 @@ if ($project_id) { // Запрос к БД на получение списка 
 $tasks = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 
 // Полнотекстовый поиск по задачам пользователя
-$search = $_POST['search'] ?? '';
+$search = $_GET['search'] ?? '';
 $not_found = false;
 
 if ($search) {
