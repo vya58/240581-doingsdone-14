@@ -32,3 +32,9 @@ CREATE TABLE tasks (
     FOREIGN KEY (user_id) REFERENCES users (user_id),
     FOREIGN KEY (project_id) REFERENCES projects (project_id)
 );
+
+/*
+SQL-инструкция на создание полнотекстового индекса для поля «название» в таблице задач
+*/
+CREATE FULLTEXT INDEX task_title_search
+ON tasks(task_name);
