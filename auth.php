@@ -6,19 +6,19 @@ $error_message = 'Пожалуйста, исправьте ошибки в фо�
 
 //Массив с функциями для валидации полей формы запроса
 $rules = [
-    'email' => function($value) {
+    'email' => function ($value) {
         return validate_email($value);
     },
-    'password' => function($value) {
+    'password' => function ($value) {
         return validate_field_length($value, 0, 255);
-    },
+    }
 ];
 
 //Валидация данных, введённых в поля формы
-if($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $guest = filter_input_array(INPUT_POST, ['email' => FILTER_DEFAULT, 'password' => FILTER_DEFAULT], true);
-    
+
     foreach ($guest as $key => $value) {
         if (isset($rules[$key])) {
             $rule = $rules[$key];
@@ -30,11 +30,17 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     //Вывод сообщений о пустых полях формы
     if (count($errors)) {
         $form_content = include_template('auth.php', [
-            'title' => 'Document',
             'errors' => $errors,
             'error_message' => $error_message
         ]);
-        print($form_content);
+        $layout_content = include_template('layout.php', [
+            'content' => $form_content,
+            'title' => $title,
+            'user' => $user,
+            'year' => $year
+        ]);
+
+        print($layout_content);
         exit;
     }
 
@@ -58,19 +64,30 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         $error_message = 'Вы ввели неверный email/пароль';
         $errors['email'] = "";
         $errors['password'] = "Неверный пароль";
-         $form_content = include_template('auth.php', [
-            'title' => 'Document',
+        $form_content = include_template('auth.php', [
             'errors' => $errors,
             'error_message' => $error_message
         ]);
-        print($form_content);
+        $layout_content = include_template('layout.php', [
+            'content' => $form_content,
+            'title' => $title,
+            'user' => $user,
+            'year' => $year
+        ]);
+
+        print($layout_content);
         exit;
     }
 }
 
 //Подключение шаблона с формой
-$form_content = include_template('auth.php', [
-    'title' => 'Document',
-]); 
+$form_content = include_template('auth.php');
 
-print($form_content);
+$layout_content = include_template('layout.php', [
+    'content' => $form_content,
+    'title' => $title,
+    'user' => $user,
+    'year' => $year
+]);
+
+print($layout_content);

@@ -1,6 +1,10 @@
 <?php
 session_start();
 require_once('helpers.php');
+// Title сайта
+$title = 'Дела в порядке';
+//Дата для футера сайта
+$year = date("Y");
 
 $db = require_once('db.php');
 
@@ -23,7 +27,7 @@ if (!$link) {
 $projects = [];
 $content = '';
 
-// Устанавливаем id и имя пользователя
+// Устанавливаем id и имя пользователя в сессии
 if (isset($_SESSION['user_id'])) {
     $user['user_id'] = $_SESSION['user_id'];
     $user['user_name'] = $_SESSION['user_name'];
@@ -31,7 +35,6 @@ if (isset($_SESSION['user_id'])) {
     $user['user_id'] = false;
     $user['user_name'] = false;
 }
-
 
 // Разрешённые для загрузки типы файлов
 $mime_types = array(
