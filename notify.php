@@ -6,8 +6,8 @@ use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
 
-// Запрос в БД на получение всех невыполненных "горящих" задач всех пользователей
-$sql = "SELECT user_name, user_email, GROUP_CONCAT(task_name SEPARATOR ';') AS task_names, GROUP_CONCAT(task_deadline SEPARATOR ';') AS task_deadlines FROM tasks t LEFT JOIN users u ON t.user_id = u.user_id WHERE task_status = 0 AND task_deadline < NOW() GROUP BY t.user_id";
+// Запрос в БД на получение всех невыполненных "горящих" задач всех пользователей (если задача не отмечена как выполненная и дата выполнения равна текущей)
+$sql = "SELECT user_name, user_email, GROUP_CONCAT(task_name SEPARATOR ';') AS task_names, GROUP_CONCAT(task_deadline SEPARATOR ';') AS task_deadlines FROM tasks t LEFT JOIN users u ON t.user_id = u.user_id WHERE task_status = 0 AND task_deadline = NOW() GROUP BY t.user_id";
 
 $sql_result = mysqli_query($link, $sql);
 

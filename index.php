@@ -69,9 +69,7 @@ if ($project_id) {
     // Запрос к БД на получение списка задач в выбранном проекте в зависимости от состояния блока фильтров задач
     $sql_add = preparation_insert_filtration($filter);
 
-    $sql = "SELECT task_id, task_name, task_deadline, project_name, task_status, task_file FROM tasks t "
-        . "INNER JOIN projects p ON t.project_id = p.project_id "
-        . "WHERE t.user_id = ? AND t.project_id = ? " . $sql_add . "ORDER BY task_date_create";
+    $sql = "SELECT task_id, task_name, task_deadline, project_name, task_status, task_file FROM tasks t INNER JOIN projects p ON t.project_id = p.project_id WHERE t.user_id = ? AND t.project_id = ? " . $sql_add . "ORDER BY task_date_create";
 
     $sql_data = [$user['user_id'], $project_id];
     $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
