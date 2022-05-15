@@ -1,0 +1,14 @@
+{
+    "name": "vya58/240581-doingsdone-14",
+    "description": "website - taskmanage",
+    "type": "project",
+    
+    "authors": [
+        {
+            "name": "Vyatheclav Korzun"
+        }
+    ],
+    "require": {
+        "symfony/mailer": "^6.0"
+    }
+}

@@ -17,8 +17,7 @@ if (!$user['user_id']) {
     exit;
 }
 
-//Получение параметров чекбокса задачи и её id из GET-запроса 
-#$show_complete_tasks = rand(0, 1);
+// Получение параметров чекбокса задачи и её id из GET-запроса 
 $tasks_check = filter_input(INPUT_GET, 'check', FILTER_SANITIZE_NUMBER_INT);
 $task_id = filter_input(INPUT_GET, 'task_id', FILTER_SANITIZE_NUMBER_INT);
 $tasks_status = [
@@ -26,7 +25,7 @@ $tasks_status = [
     'user_id' => $user['user_id'],
     'task_id' => $task_id
 ];
-//SQL-запрос на инверование статуса задачи
+// SQL-запрос на инверование статуса задачи
 $sql = "UPDATE tasks SET task_status = ? WHERE user_id = ? AND task_id = ?;";
 
 $stmt = get_prepare_stmt($link, $sql, $tasks_status);
@@ -53,7 +52,6 @@ $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
 $projects = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 
 //Получение параметров чекбокса "Показывать выполненные" из GET-запроса
-#$show_complete_tasks = rand(0, 1);
 $show_complete_tasks = filter_input(INPUT_GET, 'show_completed', FILTER_SANITIZE_NUMBER_INT);
 
 if (!$show_complete_tasks) {
@@ -105,13 +103,12 @@ if ($project_id) {
 
 $tasks = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 
-// 8.6. Полнотекстовый поиск
 // Полнотекстовый поиск по задачам пользователя
 $search = $_GET['search'] ?? '';
 $not_found = false;
 
 if ($search) {
-    //Установка $show_complete_tasks в 1, чтобы в поиске отображались и выполненные задачи
+    // Установка $show_complete_tasks в 1, чтобы в поиске отображались и выполненные задачи
     $show_complete_tasks = 1;
     $search_request = trim($search) . '*';
 
@@ -128,18 +125,15 @@ if ($search) {
     }
 }
 
-// 8.6. Полнотекстовый поиск по задачам пользователя
+// Полнотекстовый поиск по задачам пользователя
 $main_content = include_template('main.php', [
     'projects' => $projects,
     'tasks' => $tasks,
     'show_complete_tasks' => $show_complete_tasks,
     'project_id' => $project_id,
-    // 8.6. Полнотекстовый поиск
     'not_found' => $not_found,
     'search' => $search,
-    // 8.6. Полнотекстовый поиск
     'filter' => $filter
-
 ]);
 
 $layout_content = include_template('layout.php', [

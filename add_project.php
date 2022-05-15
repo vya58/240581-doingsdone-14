@@ -13,22 +13,22 @@ $project_names = array_column($projects, 'project_name');
 
 $errors = [];
 
-//Валидация данных, введённых в поля формы
+// Валидация данных, введённых в поля формы
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    //Получение запроса из формы
+    // Получение запроса из формы
     $project = filter_input_array(INPUT_POST, ['name' => FILTER_DEFAULT], true);
     $project_name = $project['name'];
 
-    //Фильтрация запроса
+    // Фильтрация запроса
     $project_name = filter_string($project_name);
 
-    //Проверка заполненного поля на ошибки
+    // Проверка заполненного поля на ошибки
     $errors['name'] = validate_field_length($project_name, 0, 30);
     if (!$errors['name']) {
         $errors['name'] = validate_project_name($link, $user, $project_name);
     }
 
-    //Вывод сообщений об ошибочно заполненных полях формы добавления задачи
+    // Вывод сообщений об ошибочно заполненных полях формы добавления задачи
     if ($errors['name']) {
         $form_content = include_template('add_project.php', [
             'projects' => $projects,
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    //Формирование и выполнение SQL-запроса в БД, в случае успешной проверки формы, на добавление нового проекта
+    // Формирование и выполнение SQL-запроса в БД, в случае успешной проверки формы, на добавление нового проекта
     $project['name'] = $project_name;
 
     array_unshift($project, $user['user_id']);
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $sql_result = mysqli_stmt_get_result($stmt);
 
-    //Переадресация пользователя на главную страницу после успешного добавления новой задачи
+    // Переадресация пользователя на главную страницу после успешного добавления новой задачи
     if (false === $sql_result) {
 
         header("Location: index.php");
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 
-//Подключение шаблона с формой добавления задачи
+// Подключение шаблона с формой добавления задачи
 $form_content = include_template('add_project.php', [
     'projects' => $projects,
 ]);
