@@ -25,6 +25,7 @@ $tasks_status = [
     'user_id' => $user['user_id'],
     'task_id' => $task_id
 ];
+
 // SQL-запрос на инверование статуса задачи
 $sql = "UPDATE tasks SET task_status = ? WHERE user_id = ? AND task_id = ?;";
 
@@ -100,7 +101,8 @@ if ($project_id) {
 $tasks = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 
 // Полнотекстовый поиск по задачам пользователя
-$search = $_GET['search'] ?? '';
+$search = filter_input(INPUT_GET, 'search') ?? '';
+
 $not_found = false;
 
 if ($search) {

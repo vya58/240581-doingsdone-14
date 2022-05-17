@@ -356,24 +356,6 @@ function preparation_insert_filtration($filter)
     return $sql_add;
 }
 
-/** !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * Подключение layout.php
- * @param $title - Атрибут title для <!DOCTYPE HTML>
- * @param $user - Массив с id и именем пользователя
- * @param $content - Подключаемая к layout страница
- * 
- * @return $layout_content Подготовленный для печати layout
- */
-function include_layout($title, $user, $content)
-{
-    $layout_content = include_template('layout.php', [
-        'title' => $title,
-        'user' => $user,
-        'content' => $content
-    ]);
-    return $layout_content;
-}
-
 /** Функция mb_ucfirst предназначена для преобразования первой буквы строки в "ВЕРХНИЙ РЕГИСТР".
  * Функция "ucfirst()" не использовалась, т.к. не работает с кириллицей
  * Взято: https://dwweb.ru/page/php/function/081_mb_ucfirst_php.html
@@ -381,7 +363,6 @@ function include_layout($title, $user, $content)
  * 
  * @return mb_strtoupper - Преобразованная строка
  */
-
 function mb_ucfirst($string, $enc = 'UTF-8')
 {
     return mb_strtoupper(mb_substr($string, 0, 1, $enc), $enc) . mb_substr($string, 1, mb_strlen($string, $enc), $enc);

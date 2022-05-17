@@ -24,10 +24,6 @@ foreach ($users_deadline_id as $user_id) {
     $user_ids[] = $user_id['user_id'];
 }
 
-if (!$user_ids) {
-    exit;
-}
-
 $count = count($user_ids);
 
 // Перебор всех пользователей, имеющих невыполненные "горящие" задачи
@@ -74,13 +70,14 @@ for ($i = 0; $i < $count; $i++) {
 
     $text_message = $text_message . "<br>" . 'Ваш сервис «Дела в порядке»' . "<br>" . "<a href=" . $email_send_server . ">" . $email_send_server . "</a>";
 
-    // Создание массива для хранения параметров отправляемых email
+    // Создание массива параметров отправляемого email
     $deadline_message = [
         'from' => $email_send_server,
         'to' => $users_deadlines[0]['user_email'],
         'subject' => 'Уведомление от сервиса «Дела в порядке»',
         'text' => $text_message
     ];
+
     $transport = Transport::fromDsn($dsn);
 
     // Формирование сообщения
