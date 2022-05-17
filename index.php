@@ -95,7 +95,7 @@ if ($project_id) {
         print($layoutContent);
         exit();
     }
-} 
+}
 
 $tasks = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 
