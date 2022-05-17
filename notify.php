@@ -6,8 +6,8 @@ use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
 
-// Запрос в БД на получение всех невыполненных "горящих" задач всех пользователей (если задача не отмечена как выполненная и дата выполнения равна текущей)
-$sql = "SELECT user_name, user_email, GROUP_CONCAT(task_name SEPARATOR ';') AS task_names, GROUP_CONCAT(task_deadline SEPARATOR ';') AS task_deadlines FROM tasks t LEFT JOIN users u ON t.user_id = u.user_id WHERE task_status = 0 AND task_deadline = CURDATE() GROUP BY user_name";
+// Запрос на получение id всех пользователей, у которых есть невыполненные задачи с датой выполнения, совпадающей с текущей
+$sql = "SELECT DISTINCT user_id FROM tasks WHERE task_status = 0 AND task_deadline < CURDATE();";
 
 $sql_result = mysqli_query($link, $sql);
 
@@ -15,23 +15,33 @@ if (false === $sql_result) {
     output_error_sql($link);
 }
 
-$users_deadlines = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
+$users_deadline_id = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 
-// Разбивка "горящих" задач по каждому пользователю
-foreach ($users_deadlines as $user_deadline) {
-    // Создание массивов наименований задач и дат их выполнения из строк, созданных с помощью "GROUP_CONCAT" в SQL-запросе
-    $user_task_names = explode(";", $user_deadline['task_names']);
-    $user_task_deadlines = explode(";", $user_deadline['task_deadlines']);
+$user_ids = [];
 
-    // Создание массива для хранения параметров отправляемых email
-    $deadline_message = [
-        'from' => $email_send_server,
-        'to' => $user_deadline['user_email'],
-        'subject' => 'Уведомление от сервиса «Дела в порядке»',
-        'text' => ''
-    ];
+// Создание массива с id отобранных пользователей
+foreach ($users_deadline_id as $user_id) {
+    $user_ids[] = $user_id['user_id'];
+}
 
-    $count = count($user_task_names);
+if (!$user_ids) {
+    exit;
+}
+
+$count = count($user_ids);
+
+// Перебор всех пользователей, имеющих невыполненные "горящие" задачи
+for ($i = 0; $i < $count; $i++) {
+
+    // Запрос в БД на получение данных по всем невыполненным "горящим" задачам i-того пользователя
+    $sql_data = [$user_ids[$i]];
+    $sql = "SELECT user_name, user_email, task_name, task_deadline FROM users u INNER JOIN tasks t ON u.user_id = t.user_id WHERE u.user_id = ? AND task_status = 0 AND task_deadline < CURDATE();";
+
+    $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
+
+    $users_deadlines = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
+
+    $count_tasks = count($users_deadlines);
 
     // Элементы текста и пунктуации текста сообщения, если у пользователя одна "горящая" задача
     $you = 'У Вас запланирована задача ';
@@ -39,30 +49,38 @@ foreach ($users_deadlines as $user_deadline) {
     $pointing = '.';
 
     // Элементы текста и пунктуации текста сообщения, если у пользователя более одой "горящей" задачи
-    if ($count > 1) {
+    if ($count_tasks > 1) {
         $you = 'У Вас запланированы задачи: '  . "<br>";
         $hyphen = '- ';
         $pointing = ';';
     }
 
     // Начало сообщения в зависимости от количества "горящих" задач
-    $text_message = 'Уважаемый(ая), ' . $user_deadline['user_name'] . '!' . "<br>" . "<br>" . $you;
+    $text_message = 'Уважаемый(ая), ' . $users_deadlines[0]['user_name'] . '!' . "<br>" . "<br>" . $you;
 
-    // Объединение всех "горящих" задач в один текст
-    for ($i = 0; $i < $count; $i++) {
+    $counter = -1;
 
-        if ($i == ($count - 1)) {
+    foreach ($users_deadlines as $user_deadline) {
+
+        $counter++;
+
+        if ($counter == ($count_tasks - 1)) {
             $pointing = '.';
         }
 
-        $text_message = $text_message . $hyphen . '"' . $user_task_names[$i] . '"' . ' на ' . date("Y-m-d", strtotime($user_task_deadlines[$i])) . $pointing . "<br>";
+        // Добавление в текст сообщения подписи и email отправителя
+        $text_message = $text_message . $hyphen . '"' . $user_deadline['task_name'] . '"' . ' на ' . date("Y-m-d", strtotime($user_deadline['task_deadline'])) . $pointing . "<br>";
     }
 
-    // Добавление в текст сообщения подписи и email отправителя
-    $text_message = $text_message . "<br>" . 'Ваш сервис «Дела в порядке»' . "<br>" . $email_send_server;
+    $text_message = $text_message . "<br>" . 'Ваш сервис «Дела в порядке»' . "<br>" . "<a href=" . $email_send_server . ">" . $email_send_server . "</a>";
 
-    $deadline_message['text'] = $text_message;
-
+    // Создание массива для хранения параметров отправляемых email
+    $deadline_message = [
+        'from' => $email_send_server,
+        'to' => $users_deadlines[0]['user_email'],
+        'subject' => 'Уведомление от сервиса «Дела в порядке»',
+        'text' => $text_message
+    ];
     $transport = Transport::fromDsn($dsn);
 
     // Формирование сообщения
