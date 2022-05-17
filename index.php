@@ -91,9 +91,7 @@ if ($project_id) {
     // Запрос к БД на получение списка всех задач пользователя в зависимости от состояния блока фильтров задач
     $sql_add = preparation_insert_filtration($filter);
 
-    $sql = "SELECT task_id, task_name, task_deadline, project_name, task_status, task_file FROM tasks t "
-        . "LEFT JOIN projects p ON t.project_id = p.project_id "
-        . "WHERE t.user_id = ? " . $sql_add . "ORDER BY task_date_create";
+    $sql = "SELECT task_id, task_name, task_deadline, project_name, task_status, task_file FROM tasks t LEFT JOIN projects p ON t.project_id = p.project_id WHERE t.user_id = ? " . $sql_add . "ORDER BY task_date_create";
 
     $sql_data = [$user['user_id']];
     $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
@@ -110,9 +108,7 @@ if ($search) {
     $show_complete_tasks = 1;
     $search_request = trim($search) . '*';
 
-    $sql = "SELECT task_id, task_name, task_deadline, project_name, task_status, task_file FROM tasks t "
-        . "INNER JOIN projects p ON t.project_id = p.project_id "
-        . "WHERE t.user_id = ? AND MATCH (t.task_name) AGAINST(? IN BOOLEAN MODE)";
+    $sql = "SELECT task_id, task_name, task_deadline, project_name, task_status, task_file FROM tasks t INNER JOIN projects p ON t.project_id = p.project_id WHERE t.user_id = ? AND MATCH (t.task_name) AGAINST(? IN BOOLEAN MODE)";
 
     $sql_data = [$user['user_id'], $search_request];
     $sql_result = get_result_prepare_sql($link, $sql, $sql_data);

@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Формирование и выполнение SQL-запроса в БД, в случае успешной проверки формы, на добавление новой задачи
     array_unshift($task, $user['user_id']);
 
-    $sql = "INSERT INTO tasks (user_id, task_name, project_id, task_date_create, task_deadline, task_file) VALUES (?, ?, ?, now(), ?, ?);";
+    $sql = "INSERT INTO tasks (user_id, task_name, project_id, task_date_create, task_deadline, task_file) VALUES (?, ?, ?, now(), ?, ?)";
 
     $stmt = get_prepare_stmt($link, $sql, $task);
 

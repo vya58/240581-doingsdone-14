@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     array_unshift($project, $user['user_id']);
 
-    $sql = "INSERT INTO projects (user_id, project_name) VALUES (?, ?);";
+    $sql = "INSERT INTO projects (user_id, project_name) VALUES (?, ?)";
 
     $stmt = get_prepare_stmt($link, $sql, $project);
 
@@ -76,7 +76,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         output_error_sql($link);
     }
 }
-
 
 // Подключение шаблона с формой добавления задачи
 $form_content = include_template('add_project.php', [

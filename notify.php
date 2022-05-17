@@ -7,7 +7,7 @@ use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
 
 // Запрос на получение id всех пользователей, у которых есть невыполненные задачи с датой выполнения, совпадающей с текущей
-$sql = "SELECT DISTINCT user_id FROM tasks WHERE task_status = 0 AND task_deadline < CURDATE();";
+$sql = "SELECT DISTINCT user_id FROM tasks WHERE task_status = 0 AND task_deadline = CURDATE()";
 
 $sql_result = mysqli_query($link, $sql);
 
@@ -35,7 +35,7 @@ for ($i = 0; $i < $count; $i++) {
 
     // Запрос в БД на получение данных по всем невыполненным "горящим" задачам i-того пользователя
     $sql_data = [$user_ids[$i]];
-    $sql = "SELECT user_name, user_email, task_name, task_deadline FROM users u INNER JOIN tasks t ON u.user_id = t.user_id WHERE u.user_id = ? AND task_status = 0 AND task_deadline < CURDATE();";
+    $sql = "SELECT user_name, user_email, task_name, task_deadline FROM users u INNER JOIN tasks t ON u.user_id = t.user_id WHERE u.user_id = ? AND task_status = 0 AND task_deadline = CURDATE()";
 
     $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
 

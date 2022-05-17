@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $new_user['password'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
     // Запрос в БД на добавление нового пользователя
-    $sql = "INSERT INTO users (user_email, user_name, user_password, user_date_add) VALUES (?, ?, ?, now());";
+    $sql = "INSERT INTO users (user_email, user_name, user_password, user_date_add) VALUES (?, ?, ?, now())";
 
     $stmt = get_prepare_stmt($link, $sql, $new_user);
 
