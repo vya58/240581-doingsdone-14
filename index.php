@@ -65,9 +65,16 @@ $project_id  = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
 // Получение значения filter из GET-запроса для фильтрации задач в блоке фильтров
 $filter = filter_input(INPUT_GET, 'filter', FILTER_SANITIZE_NUMBER_INT);
 
-// Запрос к БД на получение списка задач
+// Запрос к БД на получение списка ВСЕХ задач пользователя в зависимости от состояния блока фильтров задач
+$sql_add = preparation_insert_filtration($filter);
+
+$sql = "SELECT task_id, task_name, task_deadline, project_name, task_status, task_file FROM tasks t LEFT JOIN projects p ON t.project_id = p.project_id WHERE t.user_id = ? " . $sql_add . "ORDER BY task_date_create";
+
+$sql_data = [$user['user_id']];
+$sql_result = get_result_prepare_sql($link, $sql, $sql_data);
+
+// Запрос к БД на получение списка задач в ВЫБРАННОМ проекте в зависимости от состояния блока фильтров задач
 if ($project_id) {
-    // Запрос к БД на получение списка задач в выбранном проекте в зависимости от состояния блока фильтров задач
     $sql_add = preparation_insert_filtration($filter);
 
     $sql = "SELECT task_id, task_name, task_deadline, project_name, task_status, task_file FROM tasks t INNER JOIN projects p ON t.project_id = p.project_id WHERE t.user_id = ? AND t.project_id = ? " . $sql_add . "ORDER BY task_date_create";
@@ -88,15 +95,7 @@ if ($project_id) {
         print($layoutContent);
         exit();
     }
-} else {
-    // Запрос к БД на получение списка всех задач пользователя в зависимости от состояния блока фильтров задач
-    $sql_add = preparation_insert_filtration($filter);
-
-    $sql = "SELECT task_id, task_name, task_deadline, project_name, task_status, task_file FROM tasks t LEFT JOIN projects p ON t.project_id = p.project_id WHERE t.user_id = ? " . $sql_add . "ORDER BY task_date_create";
-
-    $sql_data = [$user['user_id']];
-    $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
-}
+} 
 
 $tasks = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 
@@ -105,6 +104,7 @@ $search = filter_input(INPUT_GET, 'search') ?? '';
 
 $not_found = false;
 
+// Полнотекстовый поиск по задачам пользователя
 if ($search) {
     // Установка $show_complete_tasks в 1, чтобы в поиске отображались и выполненные задачи
     $show_complete_tasks = 1;
@@ -121,7 +121,6 @@ if ($search) {
     }
 }
 
-// Полнотекстовый поиск по задачам пользователя
 $main_content = include_template('main.php', [
     'projects' => $projects,
     'tasks' => $tasks,

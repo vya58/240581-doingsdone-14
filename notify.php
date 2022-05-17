@@ -60,7 +60,7 @@ for ($i = 0; $i < $count; $i++) {
 
         $counter++;
 
-        if ($counter == ($count_tasks - 1)) {
+        if (($count_tasks - 1) === $counter) {
             $pointing = '.';
         }
 
