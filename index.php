@@ -27,7 +27,7 @@ $tasks_status = [
 ];
 
 // SQL-запрос на инверование статуса задачи
-$sql = "UPDATE tasks SET task_status = ? WHERE user_id = ? AND task_id = ?;";
+$sql = "UPDATE tasks SET task_status = ? WHERE user_id = ? AND task_id = ?";
 
 $stmt = get_prepare_stmt($link, $sql, $tasks_status);
 
