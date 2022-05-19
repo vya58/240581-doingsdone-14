@@ -41,16 +41,10 @@ if (false === $result) {
     output_error_sql($link);
 }
 
-$sql_result = mysqli_stmt_get_result($stmt);
+mysqli_stmt_get_result($stmt);
 
-// Запрос в БД списка проектов и количества задач в каждом из них
-$sql_data = [$user['user_id']];
-
-$sql = "SELECT project_name, p.project_id, COUNT(task_name) AS count_tasks FROM projects p LEFT JOIN tasks t ON t.project_id = p.project_id WHERE p.user_id = ? GROUP BY project_name, p.project_id";
-
-$sql_result = get_result_prepare_sql($link, $sql, $sql_data);
-
-$projects = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
+// Запрос в БД списка проектов пользователя и количества задач в каждом из них
+$projects = get_user_projects($link, $user['user_id']);
 
 //Получение параметров чекбокса "Показывать выполненные" из GET-запроса
 $show_complete_tasks = filter_input(INPUT_GET, 'show_completed', FILTER_SANITIZE_NUMBER_INT);
@@ -99,8 +93,11 @@ if ($project_id) {
 
 $tasks = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 
-// Полнотекстовый поиск по задачам пользователя
-$search = filter_input(INPUT_GET, 'search') ?? '';
+// Получение строки из поискового запроса пользователя
+$search = filter_input(INPUT_GET, 'search', FILTER_DEFAULT) ?? '';
+
+//Фильтрация, в том числе и символов "*, (, )" из строки запроса
+$search = preg_replace('/[^\p{L}\p{N}\s]/u', '', trim($search));
 
 $not_found = false;
 
@@ -108,7 +105,7 @@ $not_found = false;
 if ($search) {
     // Установка $show_complete_tasks в 1, чтобы в поиске отображались и выполненные задачи
     $show_complete_tasks = 1;
-    $search_request = trim($search) . '*';
+    $search_request = $search . '*';
 
     $sql = "SELECT task_id, task_name, task_deadline, project_name, task_status, task_file FROM tasks t INNER JOIN projects p ON t.project_id = p.project_id WHERE t.user_id = ? AND MATCH (t.task_name) AGAINST(? IN BOOLEAN MODE)";
 
@@ -121,8 +118,16 @@ if ($search) {
     }
 }
 
-$main_content = include_template('main.php', [
+// Подключение шаблонов страниц
+$content_project = include_template('project_side.php', [
     'projects' => $projects,
+    'project_id' => $project_id,
+    'show_complete_tasks' => $show_complete_tasks,
+    'filter' => $filter
+]);
+
+$main_content = include_template('main.php', [
+    'content_project' => $content_project,
     'tasks' => $tasks,
     'show_complete_tasks' => $show_complete_tasks,
     'project_id' => $project_id,

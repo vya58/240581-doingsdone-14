@@ -7,7 +7,7 @@ use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
 
 // Запрос на получение id всех пользователей, у которых есть невыполненные задачи с датой выполнения, совпадающей с текущей
-$sql = "SELECT DISTINCT user_id FROM tasks WHERE task_status = 0 AND task_deadline = CURDATE()";
+$sql = "SELECT DISTINCT u.user_id, user_name, user_email FROM users u INNER JOIN tasks t ON u.user_id = t.user_id WHERE task_status = 0 AND task_deadline = CURDATE() ORDER BY u.user_id";
 
 $sql_result = mysqli_query($link, $sql);
 
@@ -15,29 +15,31 @@ if (false === $sql_result) {
     output_error_sql($link);
 }
 
-$users_deadline_id = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
+$notified_users = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 
-$user_ids = [];
+// Выход, если нет пользователей с "горящими" задачами
+$count = count($notified_users);
 
-// Создание массива с id отобранных пользователей
-foreach ($users_deadline_id as $user_id) {
-    $user_ids[] = $user_id['user_id'];
+if (0 === $count) {
+    exit;
 }
 
-$count = count($user_ids);
+// Подготовленное выражение запроса в БД на получение данных по всем невыполненным "горящим" задачам пользователя
+$sql = "SELECT task_name, task_deadline FROM tasks WHERE user_id = ? AND task_status = 0 AND task_deadline = CURDATE()";
 
-// Перебор всех пользователей, имеющих невыполненные "горящие" задачи
-for ($i = 0; $i < $count; $i++) {
+$stmt = mysqli_prepare($link, $sql);
 
-    // Запрос в БД на получение данных по всем невыполненным "горящим" задачам i-того пользователя
-    $sql_data = [$user_ids[$i]];
-    $sql = "SELECT user_name, user_email, task_name, task_deadline FROM users u INNER JOIN tasks t ON u.user_id = t.user_id WHERE u.user_id = ? AND task_status = 0 AND task_deadline = CURDATE()";
+// Запрос в БД на получение данных по всем невыполненным "горящим" задачам каждого пользователя, формирование и отправка ему сообщения
+foreach ($notified_users as $notified_user) {
 
-    $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
+    mysqli_stmt_bind_param($stmt, 'i', $notified_user['user_id']);
+    mysqli_stmt_execute($stmt);
 
-    $users_deadlines = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
+    $sql_result = mysqli_stmt_get_result($stmt);
 
-    $count_tasks = count($users_deadlines);
+    $user_deadlines = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
+
+    $count_tasks = count($user_deadlines);
 
     // Элементы текста и пунктуации текста сообщения, если у пользователя одна "горящая" задача
     $you = 'У Вас запланирована задача ';
@@ -52,11 +54,12 @@ for ($i = 0; $i < $count; $i++) {
     }
 
     // Начало сообщения в зависимости от количества "горящих" задач
-    $text_message = 'Уважаемый(ая), ' . $users_deadlines[0]['user_name'] . '!' . "<br>" . "<br>" . $you;
+    $text_message = 'Уважаемый(ая), ' . $notified_user['user_name'] . '!' . "<br>" . "<br>" . $you;
 
     $counter = -1;
 
-    foreach ($users_deadlines as $user_deadline) {
+    // Формирование текста сообщения в зависимости от количества "горящих" задач у пользователя
+    foreach ($user_deadlines as $user_deadline) {
 
         $counter++;
 
@@ -64,16 +67,16 @@ for ($i = 0; $i < $count; $i++) {
             $pointing = '.';
         }
 
-        // Добавление в текст сообщения подписи и email отправителя
         $text_message = $text_message . $hyphen . '"' . $user_deadline['task_name'] . '"' . ' на ' . date("Y-m-d", strtotime($user_deadline['task_deadline'])) . $pointing . "<br>";
     }
 
+    // Добавление в текст сообщения подписи и email отправителя
     $text_message = $text_message . "<br>" . 'Ваш сервис «Дела в порядке»' . "<br>" . "<a href=" . $email_send_server . ">" . $email_send_server . "</a>";
 
     // Создание массива параметров отправляемого email
     $deadline_message = [
         'from' => $email_send_server,
-        'to' => $users_deadlines[0]['user_email'],
+        'to' => $notified_user['user_email'],
         'subject' => 'Уведомление от сервиса «Дела в порядке»',
         'text' => $text_message
     ];

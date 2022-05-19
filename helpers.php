@@ -122,8 +122,8 @@ function output_error_sql($link)
 }
 
 /**
- * Для запросов SELECT!
- * Выдаёт результат подготовленного выражения на основе SQL запроса на чтение из ДБ и переданных данных
+ * Для запросов на выборку записей!
+ * Выдаёт результат параметризованного SQL-запроса на чтение из ДБ и переданных данных
  *
  * @param $link mysqli Ресурс соединения
  * @param $sql string SQL запрос с плейсхолдерами вместо значений
@@ -131,7 +131,7 @@ function output_error_sql($link)
  *
  * @return mysqli_result результат выполнения подготовленного запроса
  */
-function get_result_prepare_sql($link, $sql, $data = [])
+function get_result_prepare_sql($link, $sql, array $data = [])
 {
     $stmt = mysqli_prepare($link, $sql);
 
@@ -177,6 +177,26 @@ function get_result_prepare_sql($link, $sql, $data = [])
     }
 
     return mysqli_stmt_get_result($stmt);
+}
+
+/**
+ * Запрос в БД списка проектов и количества задач в каждом из них по id пользователя
+ *
+ * @param $link - mysqli Ресурс соединения
+ * @param $id - id пользователя для вставки на место плейсхолдера
+ *
+ * @return  array Двумерный массив со списком проектов и количеством задач в каждом из них
+ */
+function get_user_projects($link, $id)
+{
+    $sql = "SELECT project_name, p.project_id, COUNT(task_name) AS count_tasks FROM projects p LEFT JOIN tasks t ON t.project_id = p.project_id WHERE p.user_id = ". $id . " GROUP BY project_name, p.project_id";
+
+    $sql_result = mysqli_query($link, $sql);
+    if (false === $sql_result) {
+        output_error_sql($link);
+    }
+    
+    return mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 }
 
 /**
@@ -281,8 +301,8 @@ function validate_email($value)
 }
 
 /**
- *Для запросов INSERT, UPDATE, DELETE!
- *Подготавливает SQL выражение к выполнению
+ *Для запросов на изменение данных!
+ *Подготавливает SQL-выражение к выполнению
  *@param $link mysqli - Ресурс соединения
  *@param $sql string - SQL запрос с плейсхолдерами вместо значений
  *

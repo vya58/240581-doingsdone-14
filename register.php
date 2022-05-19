@@ -43,11 +43,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Вывод сообщений об ошибочно заполненных полях формы
     if (count($errors)) {
-        $form_content = include_template('register.php', [
-            'title' => 'Document',
-            'errors' => $errors
+        $form_content = include_template('register.php');
+
+        $layout_content = include_template('layout.php', [
+            'content' => $form_content,
+            'title' => $title,
+            'user' => $user,
+            'year' => $year
         ]);
-        print($form_content);
+
+        print($layout_content);
         exit;
     }
 
@@ -80,8 +85,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Подключение шаблона с формой
-$form_content = include_template('register.php', [
-    'title' => 'Document'
+$form_content = include_template('register.php');
+
+$layout_content = include_template('layout.php', [
+    'content' => $form_content,
+    'title' => $title,
+    'user' => $user,
+    'year' => $year
 ]);
 
-print($form_content);
+print($layout_content);

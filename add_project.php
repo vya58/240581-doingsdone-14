@@ -1,14 +1,9 @@
 <?php
 require_once('init.php');
 
-// Запрос в БД списка проектов и количества задач в каждом из них с помощью подготовленных выражений
-$sql_data = [$user['user_id']];
+// Запрос в БД списка проектов пользователя и количества задач в каждом из них
+$projects = get_user_projects($link, $user['user_id']);
 
-$sql = "SELECT project_name, p.project_id, COUNT(task_name) AS count_tasks FROM projects p LEFT JOIN tasks t ON t.project_id = p.project_id WHERE p.user_id = ? GROUP BY project_name, p.project_id";
-
-$sql_result = get_result_prepare_sql($link, $sql, $sql_data);
-
-$projects = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 $project_names = array_column($projects, 'project_name');
 
 $errors = [];
@@ -30,7 +25,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Вывод сообщений об ошибочно заполненных полях формы добавления задачи
     if ($errors['name']) {
+        $content_project = include_template('project_side.php', [
+            'projects' => $projects
+        ]);
+
         $form_content = include_template('add_project.php', [
+            'content_project' => $content_project,
             'projects' => $projects,
             'user' => $user,
             'errors' => $errors
@@ -77,9 +77,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
+$content_project = include_template('project_side.php', [
+    'projects' => $projects
+]);
+
 // Подключение шаблона с формой добавления задачи
 $form_content = include_template('add_project.php', [
-    'projects' => $projects,
+    'content_project' => $content_project,
+    'projects' => $projects
 ]);
 
 $layout_content = include_template('layout.php', [
