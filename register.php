@@ -43,7 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Вывод сообщений об ошибочно заполненных полях формы
     if (count($errors)) {
-        $form_content = include_template('register.php');
+        $form_content = include_template('register.php', [
+            'errors' => $errors
+        ]);
 
         $layout_content = include_template('layout.php', [
             'content' => $form_content,
