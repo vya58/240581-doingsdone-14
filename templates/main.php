@@ -1,31 +1,15 @@
-<section class="content__side">
-    <h2 class="content__side-heading">Проекты</h2>
+<?= $content_project; ?>
 
-    <nav class="main-navigation">
-        <ul class="main-navigation__list">
-            <?php foreach ($projects as $project) : $project_name = $project['project_name']; ?>
-                <li class="main-navigation__list-item <?php if ($project['project_id'] == $project_id) {
-                                                            echo 'main-navigation__list-item--active';
-                                                        } ?>">
-                    <a class="main-navigation__list-item-link" href="/index.php?id=<?= $project['project_id']; ?>&filter=<?= $filter; ?>&show_completed=<?= $show_complete_tasks; ?>"><?= htmlspecialchars($project_name); ?></a>
-                    <span class="main-navigation__list-item-count"><?= $project['count_tasks']; ?></span>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    </nav>
-
-    <a class="button button--transparent button--plus content__side-button" href="add_project.php" target="project_add">Добавить проект</a>
-</section>
 
 <main class="content__main">
     <h2 class="content__main-heading">Список задач</h2>
-    <!-- 8.6. Полнотекстовый поиск -->
+    <!-- Полнотекстовый поиск -->
     <form class="search-form" action="index.php" method="get" autocomplete="off">
         <input class="search-form__input" type="text" name="search" value="<?= filter_input(INPUT_GET, 'search'); ?>" placeholder="Поиск по задачам">
 
         <input class="search-form__submit" type="submit" name="" value="Искать">
     </form>
-    <!-- 8.6. Полнотекстовый поиск -->
+
     <div class="tasks-controls">
         <nav class="tasks-switch">
             <a href="/index.php?id=<?= $project_id; ?>&filter=1&show_completed=<?= $show_complete_tasks; ?>" class="tasks-switch__item <?php if (1 == $filter || false == $filter) {
@@ -70,7 +54,7 @@
                 <td class="task__date"><?= $task['task_deadline'] ?></td>
             </tr>
         <?php endforeach; ?>
-        <!-- 8.6. Полнотекстовый поиск -->
+        <!-- Полнотекстовый поиск -->
         <?php if ($not_found) : ?>
             <tr class="tasks__item task">
                 <td class="task__select">
@@ -78,6 +62,6 @@
                 </td>
             </tr>
         <?php endif ?>
-        <!-- 8.6. Полнотекстовый поиск -->
+        <!-- Полнотекстовый поиск -->
     </table>
 </main>

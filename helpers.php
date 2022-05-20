@@ -78,52 +78,6 @@ function db_get_prepare_stmt($link, $sql, $data = [])
 }
 
 /**
- * Возвращает корректную форму множественного числа
- * Ограничения: только для целых чисел
- *
- * Пример использования:
- * $remaining_minutes = 5;
- * echo "Я поставил таймер на {$remaining_minutes} " .
- *     get_noun_plural_form(
- *         $remaining_minutes,
- *         'минута',
- *         'минуты',
- *         'минут'
- *     );
- * Результат: "Я поставил таймер на 5 минут"
- *
- * @param int $number Число, по которому вычисляем форму множественного числа
- * @param string $one Форма единственного числа: яблоко, час, минута
- * @param string $two Форма множественного числа для 2, 3, 4: яблока, часа, минуты
- * @param string $many Форма множественного числа для остальных чисел
- *
- * @return string Рассчитанная форма множественнго числа
- */
-function get_noun_plural_form(int $number, string $one, string $two, string $many): string
-{
-    $number = (int) $number;
-    $mod10 = $number % 10;
-    $mod100 = $number % 100;
-
-    switch (true) {
-        case ($mod100 >= 11 && $mod100 <= 20):
-            return $many;
-
-        case ($mod10 > 5):
-            return $many;
-
-        case ($mod10 === 1):
-            return $one;
-
-        case ($mod10 >= 2 && $mod10 <= 4):
-            return $two;
-
-        default:
-            return $many;
-    }
-}
-
-/**
  * Подключает шаблон, передает туда данные и возвращает итоговый HTML контент
  * @param string $name Путь к файлу шаблона относительно папки templates
  * @param array $data Ассоциативный массив с данными для шаблона
@@ -148,6 +102,12 @@ function include_template($name, array $data = [])
     return $result;
 }
 
+/**
+ * Вывод ошибки запроса в базу данных
+ * @param $link mysqli Ресурс соединения 
+ * 
+ * @return - Подключение шаблона с выводом ошибки запроса
+ */
 function output_error_sql($link)
 {
     # вывод ошибки запроса в базу данных
@@ -162,8 +122,8 @@ function output_error_sql($link)
 }
 
 /**
- * Для запросов SELECT!
- * Выдаёт результат подготовленного выражения на основе SQL запроса на чтение из ДБ и переданных данных
+ * Для запросов на выборку записей!
+ * Выдаёт результат параметризованного SQL-запроса на чтение из ДБ и переданных данных
  *
  * @param $link mysqli Ресурс соединения
  * @param $sql string SQL запрос с плейсхолдерами вместо значений
@@ -171,7 +131,7 @@ function output_error_sql($link)
  *
  * @return mysqli_result результат выполнения подготовленного запроса
  */
-function get_result_prepare_sql($link, $sql, $data = [])
+function get_result_prepare_sql($link, $sql, array $data = [])
 {
     $stmt = mysqli_prepare($link, $sql);
 
@@ -220,10 +180,30 @@ function get_result_prepare_sql($link, $sql, $data = [])
 }
 
 /**
+ * Запрос в БД списка проектов и количества задач в каждом из них по id пользователя
+ *
+ * @param $link - mysqli Ресурс соединения
+ * @param $id - id пользователя для вставки на место плейсхолдера
+ *
+ * @return  array Двумерный массив со списком проектов и количеством задач в каждом из них
+ */
+function get_user_projects($link, $id)
+{
+    $sql = "SELECT project_name, p.project_id, COUNT(task_name) AS count_tasks FROM projects p LEFT JOIN tasks t ON t.project_id = p.project_id WHERE p.user_id = ". $id . " GROUP BY project_name, p.project_id";
+
+    $sql_result = mysqli_query($link, $sql);
+    if (false === $sql_result) {
+        output_error_sql($link);
+    }
+    
+    return mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
+}
+
+/**
  *Фильтрация текстового поля, полученного из POST-запрося
  *@param $name - фильтруемая строка
  *
- *@return - отфильтрованная строка
+ *@return - string (отфильтрованная строка)
  */
 function get_post_val($name)
 {
@@ -232,10 +212,10 @@ function get_post_val($name)
 
 /**
  *Проверка существования проекта в списке проектов пользователя по его id
- *@param $id - id проекта
+ *@param int $id - id проекта
  *@param array $allowed_list - массив с id проектов пользователя
  *
- *@return - текст ошибки или null
+ *@return - string | null
  */
 function validate_project($id, $allowed_list)
 {
@@ -283,7 +263,7 @@ function validate_project_name($link, $user, $project_name)
  *@param $min - минимальное значение
  *@param $max - максимальное значение
  *
- *@return - текст ошибки или null
+ *@return - string | null
  */
 function validate_field_length($value, $min, $max)
 {
@@ -305,7 +285,7 @@ function validate_field_length($value, $min, $max)
  *Проверяет на пустоту поля и корретность email
  *@param $value - email
  *
- *@return - текст ошибки или null
+ *@return - string | null
  */
 function validate_email($value)
 {
@@ -321,8 +301,8 @@ function validate_email($value)
 }
 
 /**
- *Для запросов INSERT, UPDATE, DELETE!
- *Подготавливает SQL выражение к выполнению
+ *Для запросов на изменение данных!
+ *Подготавливает SQL-выражение к выполнению
  *@param $link mysqli - Ресурс соединения
  *@param $sql string - SQL запрос с плейсхолдерами вместо значений
  *
@@ -396,24 +376,6 @@ function preparation_insert_filtration($filter)
     return $sql_add;
 }
 
-/** !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * Подключение layout.php
- * @param $title - Атрибут title для <!DOCTYPE HTML>
- * @param $user - Массив с id и именем пользователя
- * @param $content - Подключаемая к layout страница
- * 
- * @return $layout_content Подготовленный для печати layout
- */
-function include_layout($title, $user, $content)
-{
-    $layout_content = include_template('layout.php', [
-        'title' => $title,
-        'user' => $user,
-        'content' => $content
-    ]);
-    return $layout_content;
-}
-
 /** Функция mb_ucfirst предназначена для преобразования первой буквы строки в "ВЕРХНИЙ РЕГИСТР".
  * Функция "ucfirst()" не использовалась, т.к. не работает с кириллицей
  * Взято: https://dwweb.ru/page/php/function/081_mb_ucfirst_php.html
@@ -421,7 +383,6 @@ function include_layout($title, $user, $content)
  * 
  * @return mb_strtoupper - Преобразованная строка
  */
-
 function mb_ucfirst($string, $enc = 'UTF-8')
 {
     return mb_strtoupper(mb_substr($string, 0, 1, $enc), $enc) . mb_substr($string, 1, mb_strlen($string, $enc), $enc);

@@ -17,8 +17,7 @@ if (!$user['user_id']) {
     exit;
 }
 
-//Получение параметров чекбокса задачи и её id из GET-запроса 
-#$show_complete_tasks = rand(0, 1);
+// Получение параметров чекбокса задачи и её id из GET-запроса 
 $tasks_check = filter_input(INPUT_GET, 'check', FILTER_SANITIZE_NUMBER_INT);
 $task_id = filter_input(INPUT_GET, 'task_id', FILTER_SANITIZE_NUMBER_INT);
 $tasks_status = [
@@ -26,8 +25,9 @@ $tasks_status = [
     'user_id' => $user['user_id'],
     'task_id' => $task_id
 ];
-//SQL-запрос на инверование статуса задачи
-$sql = "UPDATE tasks SET task_status = ? WHERE user_id = ? AND task_id = ?;";
+
+// SQL-запрос на инверование статуса задачи
+$sql = "UPDATE tasks SET task_status = ? WHERE user_id = ? AND task_id = ?";
 
 $stmt = get_prepare_stmt($link, $sql, $tasks_status);
 
@@ -41,19 +41,12 @@ if (false === $result) {
     output_error_sql($link);
 }
 
-$sql_result = mysqli_stmt_get_result($stmt);
+mysqli_stmt_get_result($stmt);
 
-// Запрос в БД списка проектов и количества задач в каждом из них
-$sql_data = [$user['user_id']];
-
-$sql = "SELECT project_name, p.project_id, COUNT(task_name) AS count_tasks FROM projects p LEFT JOIN tasks t ON t.project_id = p.project_id WHERE p.user_id = ? GROUP BY project_name, p.project_id";
-
-$sql_result = get_result_prepare_sql($link, $sql, $sql_data);
-
-$projects = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
+// Запрос в БД списка проектов пользователя и количества задач в каждом из них
+$projects = get_user_projects($link, $user['user_id']);
 
 //Получение параметров чекбокса "Показывать выполненные" из GET-запроса
-#$show_complete_tasks = rand(0, 1);
 $show_complete_tasks = filter_input(INPUT_GET, 'show_completed', FILTER_SANITIZE_NUMBER_INT);
 
 if (!$show_complete_tasks) {
@@ -66,14 +59,19 @@ $project_id  = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
 // Получение значения filter из GET-запроса для фильтрации задач в блоке фильтров
 $filter = filter_input(INPUT_GET, 'filter', FILTER_SANITIZE_NUMBER_INT);
 
-// Запрос к БД на получение списка задач
+// Запрос к БД на получение списка ВСЕХ задач пользователя в зависимости от состояния блока фильтров задач
+$sql_add = preparation_insert_filtration($filter);
+
+$sql = "SELECT task_id, task_name, task_deadline, project_name, task_status, task_file FROM tasks t LEFT JOIN projects p ON t.project_id = p.project_id WHERE t.user_id = ? " . $sql_add . "ORDER BY task_date_create";
+
+$sql_data = [$user['user_id']];
+$sql_result = get_result_prepare_sql($link, $sql, $sql_data);
+
+// Запрос к БД на получение списка задач в ВЫБРАННОМ проекте в зависимости от состояния блока фильтров задач
 if ($project_id) {
-    // Запрос к БД на получение списка задач в выбранном проекте в зависимости от состояния блока фильтров задач
     $sql_add = preparation_insert_filtration($filter);
 
-    $sql = "SELECT task_id, task_name, task_deadline, project_name, task_status, task_file FROM tasks t "
-        . "INNER JOIN projects p ON t.project_id = p.project_id "
-        . "WHERE t.user_id = ? AND t.project_id = ? " . $sql_add . "ORDER BY task_date_create";
+    $sql = "SELECT task_id, task_name, task_deadline, project_name, task_status, task_file FROM tasks t INNER JOIN projects p ON t.project_id = p.project_id WHERE t.user_id = ? AND t.project_id = ? " . $sql_add . "ORDER BY task_date_create";
 
     $sql_data = [$user['user_id'], $project_id];
     $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
@@ -91,33 +89,25 @@ if ($project_id) {
         print($layoutContent);
         exit();
     }
-} else {
-    // Запрос к БД на получение списка всех задач пользователя в зависимости от состояния блока фильтров задач
-    $sql_add = preparation_insert_filtration($filter);
-
-    $sql = "SELECT task_id, task_name, task_deadline, project_name, task_status, task_file FROM tasks t "
-        . "LEFT JOIN projects p ON t.project_id = p.project_id "
-        . "WHERE t.user_id = ? " . $sql_add . "ORDER BY task_date_create";
-
-    $sql_data = [$user['user_id']];
-    $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
 }
 
 $tasks = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 
-// 8.6. Полнотекстовый поиск
-// Полнотекстовый поиск по задачам пользователя
-$search = $_GET['search'] ?? '';
+// Получение строки из поискового запроса пользователя
+$search = filter_input(INPUT_GET, 'search', FILTER_DEFAULT) ?? '';
+
+//Фильтрация, в том числе и символов "*, (, )" из строки запроса
+$search = preg_replace('/[^\p{L}\p{N}\s]/u', '', trim($search));
+
 $not_found = false;
 
+// Полнотекстовый поиск по задачам пользователя
 if ($search) {
-    //Установка $show_complete_tasks в 1, чтобы в поиске отображались и выполненные задачи
+    // Установка $show_complete_tasks в 1, чтобы в поиске отображались и выполненные задачи
     $show_complete_tasks = 1;
-    $search_request = trim($search) . '*';
+    $search_request = $search . '*';
 
-    $sql = "SELECT task_id, task_name, task_deadline, project_name, task_status, task_file FROM tasks t "
-        . "INNER JOIN projects p ON t.project_id = p.project_id "
-        . "WHERE t.user_id = ? AND MATCH (t.task_name) AGAINST(? IN BOOLEAN MODE)";
+    $sql = "SELECT task_id, task_name, task_deadline, project_name, task_status, task_file FROM tasks t INNER JOIN projects p ON t.project_id = p.project_id WHERE t.user_id = ? AND MATCH (t.task_name) AGAINST(? IN BOOLEAN MODE)";
 
     $sql_data = [$user['user_id'], $search_request];
     $sql_result = get_result_prepare_sql($link, $sql, $sql_data);
@@ -128,18 +118,22 @@ if ($search) {
     }
 }
 
-// 8.6. Полнотекстовый поиск по задачам пользователя
-$main_content = include_template('main.php', [
+// Подключение шаблонов страниц
+$content_project = include_template('project_side.php', [
     'projects' => $projects,
+    'project_id' => $project_id,
+    'show_complete_tasks' => $show_complete_tasks,
+    'filter' => $filter
+]);
+
+$main_content = include_template('main.php', [
+    'content_project' => $content_project,
     'tasks' => $tasks,
     'show_complete_tasks' => $show_complete_tasks,
     'project_id' => $project_id,
-    // 8.6. Полнотекстовый поиск
     'not_found' => $not_found,
     'search' => $search,
-    // 8.6. Полнотекстовый поиск
     'filter' => $filter
-
 ]);
 
 $layout_content = include_template('layout.php', [

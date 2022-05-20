@@ -1,12 +1,16 @@
 <?php
+
 session_start();
+
+require_once('vendor/autoload.php');
 require_once('helpers.php');
+require_once('config/mail.php');
+
+$db = require_once('config/db.php');
 // Title сайта
 $title = 'Дела в порядке';
-//Дата для футера сайта
+// Дата для футера сайта
 $year = date("Y");
-
-$db = require_once('db.php');
 
 // Подключение к БД
 $link = mysqli_connect($db['host'], $db['user'], $db['password'], $db['database']);
