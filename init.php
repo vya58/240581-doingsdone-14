@@ -6,26 +6,34 @@ require_once('vendor/autoload.php');
 require_once('helpers.php');
 require_once('config/mail.php');
 
-$db = require_once('config/db.php');
+$data_base = require_once('config/db.php');
+
 // Title сайта
 $title = 'Дела в порядке';
-// Дата для футера сайта
+
+// Массив с данными пользователя по умолчанию
+$user = [
+    'user_id' => false,
+    'user_name' => false
+];
+
+// Дата для вывода в футере сайта
 $year = date("Y");
 
+// Данные для шаблона с выводом ошибки подключения к базе данных (БД)
+$error_template_data = [
+    'title' => $title,
+    'user' => $user,
+    'year' => $year
+];
+
 // Подключение к БД
-$link = mysqli_connect($db['host'], $db['user'], $db['password'], $db['database']);
+$link = mysqli_connect($data_base['host'], $data_base['user'], $data_base['password'], $data_base['database']);
 mysqli_set_charset($link, "utf8");
 
 // Вывод ошибки подключения к БД 
 if (!$link) {
-    $error = mysqli_connect_error();
-    $content = include_template('error.php', ['error' => $error]);
-    $layout_content = include_template('layout.php', [
-        'content' => $content,
-        'title' => 'Дела в порядке'
-    ]);
-    print($layout_content);
-    exit;
+    output_error_sql($link, $error_template_data);
 }
 
 $projects = [];
@@ -35,12 +43,9 @@ $content = '';
 if (isset($_SESSION['user_id'])) {
     $user['user_id'] = $_SESSION['user_id'];
     $user['user_name'] = $_SESSION['user_name'];
-} else {
-    $user['user_id'] = false;
-    $user['user_name'] = false;
 }
 
-// Разрешённые для загрузки типы файлов
+// Массив с разрешёнными для загрузки типами файлов
 $mime_types = array(
 
     'txt' => 'text/plain',

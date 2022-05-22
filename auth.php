@@ -14,74 +14,80 @@ $rules = [
     }
 ];
 
+// Получение данных, введённых в поля формы
+$guest = filter_input_array(INPUT_POST, ['email' => FILTER_DEFAULT, 'password' => FILTER_DEFAULT], true);
+
+if (false == $guest) {
+    // Подключение шаблона с формой
+    $form_content = include_template('auth.php');
+
+    $layout_content = include_template('layout.php', [
+        'content' => $form_content,
+        'title' => $title,
+        'user' => $user,
+        'year' => $year
+    ]);
+
+    print($layout_content);
+    exit;
+}
+
 // Валидация данных, введённых в поля формы
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
-    $guest = filter_input_array(INPUT_POST, ['email' => FILTER_DEFAULT, 'password' => FILTER_DEFAULT], true);
-
-    foreach ($guest as $key => $value) {
-        if (isset($rules[$key])) {
-            $rule = $rules[$key];
-            $errors[$key] = $rule($value);
-        }
-    }
-    $errors = array_filter($errors);
-
-    // Вывод сообщений о пустых полях формы
-    if (count($errors)) {
-        $form_content = include_template('auth.php', [
-            'errors' => $errors,
-            'error_message' => $error_message
-        ]);
-        $layout_content = include_template('layout.php', [
-            'content' => $form_content,
-            'title' => $title,
-            'user' => $user,
-            'year' => $year
-        ]);
-
-        print($layout_content);
-        exit;
-    }
-
-    $guest_email = [$guest['email']];
-    $user_data = [];
-
-    // Проверка email-адреса на отсутствие в БД
-    if (!count($errors)) {
-        $sql = "SELECT user_email, user_password, user_id, user_name FROM users WHERE user_email = ?";
-        $sql_result = get_result_prepare_sql($link, $sql, $guest_email);
-        $user_data = mysqli_fetch_array($sql_result, MYSQLI_ASSOC);
-    }
-    // Перенаправление зарегистрированного пользователя при валидном пароле 
-    if ($user_data && password_verify($_POST['password'], $user_data['user_password'])) {
-        $user_password = $user_data['user_password'];
-        $_SESSION['user_id'] = $user_data['user_id'];
-        $_SESSION['user_name'] = $user_data['user_name'];
-        header("Location: index.php");
-    } else {
-        // Вывод сообщения о неверном пароле при несовпаденых email или пароля
-        $error_message = 'Вы ввели неверный email/пароль';
-        $errors['email'] = "";
-        $errors['password'] = "Неверный пароль";
-        $form_content = include_template('auth.php', [
-            'errors' => $errors,
-            'error_message' => $error_message
-        ]);
-        $layout_content = include_template('layout.php', [
-            'content' => $form_content,
-            'title' => $title,
-            'user' => $user,
-            'year' => $year
-        ]);
-
-        print($layout_content);
-        exit;
+foreach ($guest as $key => $value) {
+    if (isset($rules[$key])) {
+        $rule = $rules[$key];
+        $errors[$key] = $rule($value);
     }
 }
 
-// Подключение шаблона с формой
-$form_content = include_template('auth.php');
+$errors = array_filter($errors);
+
+// Вывод сообщений о пустых полях формы
+if (count($errors)) {
+    $form_content = include_template('auth.php', [
+        'errors' => $errors,
+        'error_message' => $error_message
+    ]);
+    
+    $layout_content = include_template('layout.php', [
+        'content' => $form_content,
+        'title' => $title,
+        'user' => $user,
+        'year' => $year
+    ]);
+
+    print($layout_content);
+    exit;
+}
+
+$guest_email = [$guest['email']];
+$user_data = [];
+
+// Проверка email-адреса на отсутствие в БД
+if (!count($errors)) {
+    $sql = "SELECT user_email, user_password, user_id, user_name FROM users WHERE user_email = ?";
+
+    $sql_result = get_result_prepare_sql($link, $sql, $guest_email);
+    $user_data = mysqli_fetch_array($sql_result, MYSQLI_ASSOC);
+}
+// Перенаправление зарегистрированного пользователя при валидном пароле 
+if ($user_data && password_verify($_POST['password'], $user_data['user_password'])) {
+    $user_password = $user_data['user_password'];
+
+    $_SESSION['user_id'] = $user_data['user_id'];
+    $_SESSION['user_name'] = $user_data['user_name'];
+
+    header("Location: index.php");
+}
+// Вывод сообщения о неверном пароле при несовпаденых email или пароля
+$error_message = 'Вы ввели неверный email/пароль';
+$errors['email'] = "";
+$errors['password'] = "Неверный пароль";
+
+$form_content = include_template('auth.php', [
+    'errors' => $errors,
+    'error_message' => $error_message
+]);
 
 $layout_content = include_template('layout.php', [
     'content' => $form_content,
@@ -91,3 +97,4 @@ $layout_content = include_template('layout.php', [
 ]);
 
 print($layout_content);
+exit;
