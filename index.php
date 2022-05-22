@@ -32,19 +32,19 @@ $sql = "UPDATE tasks SET task_status = ? WHERE user_id = ? AND task_id = ?";
 $stmt = get_prepare_stmt($link, $sql, $tasks_status);
 
 if (false === $stmt) {
-    output_error_sql($link);
+    output_error_sql($link, $error_template_data);
 }
 
 $result = mysqli_stmt_execute($stmt);
 
 if (false === $result) {
-    output_error_sql($link);
+    output_error_sql($link, $error_template_data);
 }
 
 mysqli_stmt_get_result($stmt);
 
 // Запрос в БД списка проектов пользователя и количества задач в каждом из них
-$projects = get_user_projects($link, $user['user_id']);
+$projects = get_user_projects($link, $user['user_id'], $error_template_data);
 
 //Получение параметров чекбокса "Показывать выполненные" из GET-запроса
 $show_complete_tasks = filter_input(INPUT_GET, 'show_completed', FILTER_SANITIZE_NUMBER_INT);
@@ -81,11 +81,14 @@ if ($project_id) {
     if (false === $existence_project) {
         $content = include_template('404.php');
         $layoutContent = include_template('layout.php', [
-            'content' => $content,
             'title' => $title,
+            'content' => $content,
+            'user' => $user,
             'year' => $year
         ]);
+
         http_response_code(404);
+        
         print($layoutContent);
         exit();
     }
@@ -94,7 +97,7 @@ if ($project_id) {
 $tasks = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 
 // Получение строки из поискового запроса пользователя
-$search = filter_input(INPUT_GET, 'search', FILTER_DEFAULT) ?? '';
+$search = $_GET['search'] ?? '';
 
 //Фильтрация, в том числе и символов "*, (, )" из строки запроса
 $search = preg_replace('/[^\p{L}\p{N}\s]/u', '', trim($search));
@@ -137,8 +140,8 @@ $main_content = include_template('main.php', [
 ]);
 
 $layout_content = include_template('layout.php', [
-    'content' => $main_content,
     'title' => $title,
+    'content' => $main_content,
     'user' => $user,
     'year' => $year
 ]);

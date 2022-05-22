@@ -1,15 +1,14 @@
 <?= $content_project; ?>
 
-
 <main class="content__main">
     <h2 class="content__main-heading">Список задач</h2>
-    <!-- Полнотекстовый поиск -->
+    <!-- Полнотекстовый поиск по задачам -->
     <form class="search-form" action="index.php" method="get" autocomplete="off">
         <input class="search-form__input" type="text" name="search" value="<?= filter_input(INPUT_GET, 'search'); ?>" placeholder="Поиск по задачам">
 
         <input class="search-form__submit" type="submit" name="" value="Искать">
     </form>
-
+    <!-- Фильтр списка задач -->
     <div class="tasks-controls">
         <nav class="tasks-switch">
             <a href="/index.php?id=<?= $project_id; ?>&filter=1&show_completed=<?= $show_complete_tasks; ?>" class="tasks-switch__item <?php if (1 == $filter || false == $filter) {
@@ -27,12 +26,12 @@
         </nav>
 
         <label class="checkbox">
-            <!--добавить сюда атрибут "checked", если переменная $show_complete_tasks равна единице-->
+            <!--Добавление атрибута "checked", если переменная $show_complete_tasks равна единице-->
             <input class="checkbox__input visually-hidden show_completed" type="checkbox" <?php if (1 == $show_complete_tasks) echo 'checked'; ?>>
             <span class="checkbox__text">Показывать выполненные</span>
         </label>
     </div>
-
+    <!-- Вывод списка задач -->
     <table class="tasks">
         <?php foreach ($tasks as $key => $task) : ?>
             <?php if ($task['task_status'] && 0 == $show_complete_tasks) continue; ?>
@@ -54,7 +53,7 @@
                 <td class="task__date"><?= $task['task_deadline'] ?></td>
             </tr>
         <?php endforeach; ?>
-        <!-- Полнотекстовый поиск -->
+        <!-- Вывод отрицательного результата полнотекстового поиска -->
         <?php if ($not_found) : ?>
             <tr class="tasks__item task">
                 <td class="task__select">
@@ -62,6 +61,5 @@
                 </td>
             </tr>
         <?php endif ?>
-        <!-- Полнотекстовый поиск -->
     </table>
 </main>

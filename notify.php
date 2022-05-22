@@ -11,10 +11,6 @@ $sql = "SELECT DISTINCT u.user_id, user_name, user_email FROM users u INNER JOIN
 
 $sql_result = mysqli_query($link, $sql);
 
-if (false === $sql_result) {
-    output_error_sql($link);
-}
-
 $notified_users = mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 
 // Выход, если нет пользователей с "горящими" задачами

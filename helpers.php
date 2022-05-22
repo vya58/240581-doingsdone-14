@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Проверяет переданную дату на соответствие формату 'ГГГГ-ММ-ДД'
+ * Функция проверки переданной даты на соответствие формату 'ГГГГ-ММ-ДД'
  *
  * Примеры использования:
  * is_date_valid('2019-01-01'); // true
@@ -18,18 +18,20 @@ function validate_date(string $date)
 {
     $format_to_check = 'YYYY-mm-dd';
     $dateTimeObj = date_create_from_format($format_to_check, $date);
+    
     if ($dateTimeObj !== false && array_sum(date_get_last_errors()) === 0) {
         return 'Введите дату в формате «ГГГГ-ММ-ДД»';
     }
+
     return false;
 }
 
 /**
- * Создает подготовленное выражение на основе готового SQL запроса и переданных данных
+ * Функция создания подготовленного выражения на основе готового SQL-запроса и переданных данных
  *
  * @param $link mysqli Ресурс соединения
  * @param $sql string SQL запрос с плейсхолдерами вместо значений
- * @param array $data Данные для вставки на место плейсхолдеров
+ * @param array $data Массив с данными для вставки вместо плейсхолдеров
  *
  * @return mysqli_stmt Подготовленное выражение
  */
@@ -78,9 +80,10 @@ function db_get_prepare_stmt($link, $sql, $data = [])
 }
 
 /**
- * Подключает шаблон, передает туда данные и возвращает итоговый HTML контент
+ * Функция подключения шаблонов
+ * Передает туда данные и возвращает итоговый HTML контент
  * @param string $name Путь к файлу шаблона относительно папки templates
- * @param array $data Ассоциативный массив с данными для шаблона
+ * @param array $data Массив с данными для шаблона
  * 
  * @return string Итоговый HTML
  */
@@ -103,33 +106,47 @@ function include_template($name, array $data = [])
 }
 
 /**
- * Вывод ошибки запроса в базу данных
- * @param $link mysqli Ресурс соединения 
+ * Функция вывода ошибки запроса в базу данных
+ * @param $link mysqli Ресурс соединения
+ * @param array $error_template_data Массив с данными для подключения laiout.php
  * 
  * @return - Подключение шаблона с выводом ошибки запроса
  */
-function output_error_sql($link)
+function output_error_sql($link, $error_template_data)
 {
-    # вывод ошибки запроса в базу данных
+    $title = $error_template_data['title'];
+    $user = $error_template_data['user'];
+    $year = $error_template_data['year'];
+
+    if (false == $user) {
+        $user['user_id'] = false;
+        $user['user_name'] = false;
+    }
+
     $error = mysqli_error($link);
-    $content = include_template('error.php', ['error' => $error]);
+
+    $error_content = include_template('error.php', ['error' => $error]);
     $layout_content = include_template('layout.php', [
-        'content' => $content,
-        'title' => 'Дела в порядке'
+        'title' => $title,
+        'content' => $error_content,
+        'user' => $user,
+        'year' => $year
     ]);
+
     print($layout_content);
+
     exit;
 }
 
 /**
- * Для запросов на выборку записей!
- * Выдаёт результат параметризованного SQL-запроса на чтение из ДБ и переданных данных
+ * Функция выполнения параметризованных SQL-запросов на ВЫБОРКУ записей
+ * Выдаёт результат параметризованного SQL-запроса на чтение из ДБ
  *
  * @param $link mysqli Ресурс соединения
- * @param $sql string SQL запрос с плейсхолдерами вместо значений
+ * @param $sql string SQL-запрос с плейсхолдерами вместо значений
  * @param array $data Данные для вставки на место плейсхолдеров
  *
- * @return mysqli_result результат выполнения подготовленного запроса
+ * @return mysqli_result Результат выполнения подготовленного запроса
  */
 function get_result_prepare_sql($link, $sql, array $data = [])
 {
@@ -180,22 +197,24 @@ function get_result_prepare_sql($link, $sql, array $data = [])
 }
 
 /**
- * Запрос в БД списка проектов и количества задач в каждом из них по id пользователя
+ * Функция выполнения параметризованных SQL-запросов в БД на выборку списка проектов и количества задач в каждом из них по id пользователя
  *
  * @param $link - mysqli Ресурс соединения
  * @param $id - id пользователя для вставки на место плейсхолдера
+ * @param array $error_template_data Массив с данными для подключения laiout.php в используемой функции "output_error_sql()"
  *
- * @return  array Двумерный массив со списком проектов и количеством задач в каждом из них
+ * @return array Массив со списком проектов и количеством задач в каждом из них
  */
-function get_user_projects($link, $id)
+function get_user_projects($link, $id, $error_template_data)
 {
-    $sql = "SELECT project_name, p.project_id, COUNT(task_name) AS count_tasks FROM projects p LEFT JOIN tasks t ON t.project_id = p.project_id WHERE p.user_id = ". $id . " GROUP BY project_name, p.project_id";
+    $sql = "SELECT project_name, p.project_id, COUNT(task_name) AS count_tasks FROM projects p LEFT JOIN tasks t ON t.project_id = p.project_id WHERE p.user_id = " . $id . " GROUP BY project_name, p.project_id";
 
     $sql_result = mysqli_query($link, $sql);
+
     if (false === $sql_result) {
-        output_error_sql($link);
+        output_error_sql($link, $error_template_data);
     }
-    
+
     return mysqli_fetch_all($sql_result, MYSQLI_ASSOC);
 }
 
@@ -211,9 +230,9 @@ function get_post_val($name)
 }
 
 /**
- *Проверка существования проекта в списке проектов пользователя по его id
+ *Функция проверки существования проекта в списке проектов пользователя по его id
  *@param int $id - id проекта
- *@param array $allowed_list - массив с id проектов пользователя
+ *@param array $allowed_list - Массив с id проектов пользователя
  *
  *@return - string | null
  */
@@ -222,6 +241,7 @@ function validate_project($id, $allowed_list)
     if (!in_array($id, $allowed_list)) {
         return 'Указан несуществующий проект';
     }
+
     return null;
 }
 
@@ -231,10 +251,10 @@ function validate_project($id, $allowed_list)
  * @param $link mysqli Ресурс соединения
  * @param array $user Массив с id пользователя
  * @param $project_name Имя проекта
- * @param $sql string SQL запрос с плейсхолдерами вместо значений
+ * @param $sql string SQL-запрос с плейсхолдерами вместо значений
  * @param array $data Данные для вставки на место плейсхолдеров
  * 
- * @return mysqli_result результат выполнения подготовленного запроса
+ * @return mysqli_result Результат выполнения подготовленного запроса
  */
 function validate_project_name($link, $user, $project_name)
 {
@@ -252,16 +272,17 @@ function validate_project_name($link, $user, $project_name)
     if ($project_names) {
         return 'Такой проект уже существует';
     }
+
     return null;
 }
 
 /**
- *Проверка соответсвия длины строки на min и max допустимое значение
- *Использована функция "iconv_strlen", проверяющая количество симолов с учётом кодировки
+ *Функция проверки соответсвия длины строки на min и max допустимое значение
+ *Использована функция "iconv_strlen()", проверяющая количество симолов с учётом кодировки
  *Проверяет на пустоту поля и корретность email
- *@param $value - проверяемая строка
- *@param $min - минимальное значение
- *@param $max - максимальное значение
+ *@param $value - Проверяемая строка
+ *@param $min - Минимальное значение
+ *@param $max - Максимальное значение
  *
  *@return - string | null
  */
@@ -277,11 +298,12 @@ function validate_field_length($value, $min, $max)
         }
         return null;
     }
+
     return "Заполните поле!";
 }
 
 /**
- *Валидация email
+ *Функция валидации email
  *Проверяет на пустоту поля и корретность email
  *@param $value - email
  *
@@ -294,14 +316,16 @@ function validate_email($value)
     }
 
     $value = filter_var($value, FILTER_VALIDATE_EMAIL);
+
     if (!$value) {
         return 'E-mail введён некорректно.';
     }
+
     return null;
 }
 
 /**
- *Для запросов на изменение данных!
+ *Функция для подготовки SQL-запросов к выполнению. Использована в запросах на изменение данных, т.к. имеющаяся функция get_result_prepare_sql() /См. выше/ в таких запросах прилюбых результатах возвращает false
  *Подготавливает SQL-выражение к выполнению
  *@param $link mysqli - Ресурс соединения
  *@param $sql string - SQL запрос с плейсхолдерами вместо значений
@@ -351,7 +375,7 @@ function get_prepare_stmt($link, $sql, array $data = [])
 }
 
 /** 
- * Подготовка дополнения к условию SQL-запроса к БД по дате для работы блока фильтров
+ * Функция подготовки строки с дополнением к условию SQL-запроса к БД по дате для различных состояний блока фильтров
  * @param $filter - Переменная с номером фильтра из GET-запросаЖ
  * - 1 - Все задачи;
  * - 2 - Задачи на сегодня;
@@ -367,12 +391,15 @@ function preparation_insert_filtration($filter)
     if (2 == $filter) {
         $sql_add = "AND DATE(task_deadline) = CURDATE() ";
     }
+
     if (3 == $filter) {
         $sql_add = "AND DATE(task_deadline) = DATE_ADD(CURDATE(), INTERVAL 1 DAY) ";
     }
+
     if (4 == $filter) {
         $sql_add = "AND DATE(task_deadline) < CURDATE() ";
     }
+
     return $sql_add;
 }
 
@@ -388,7 +415,7 @@ function mb_ucfirst($string, $enc = 'UTF-8')
     return mb_strtoupper(mb_substr($string, 0, 1, $enc), $enc) . mb_substr($string, 1, mb_strlen($string, $enc), $enc);
 }
 
-/** Фильтрация получаемой от пользователя строки:
+/** Функция фильтрации получаемой от пользователя строки:
  * - приводит к строчному типу;
  * - убирает пробелы в начале и конце строки;
  * - вычищает лишние пробелы в строке;
@@ -402,5 +429,6 @@ function filter_string($name)
     $name = (string)$name;
     $name = trim($name);
     $name = preg_replace('/\s\s+/', ' ', $name);
+
     return mb_ucfirst($name);
 }
