@@ -63,7 +63,7 @@ if (empty($_POST['date'])) {
     $task['date'] = null;
 }
 
-if ($_POST['date'] < date('Y-m-d') && null != $task['date']) {
+if ($_POST['date'] < date('Y-m-d') && null !== $task['date']) {
     $errors['date'] = "Дата выполнения задачи не может быть ранее текущей!";
 }
 

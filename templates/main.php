@@ -11,30 +11,30 @@
     <!-- Фильтр списка задач -->
     <div class="tasks-controls">
         <nav class="tasks-switch">
-            <a href="/index.php?id=<?= $project_id; ?>&filter=1&show_completed=<?= $show_complete_tasks; ?>" class="tasks-switch__item <?php if (1 == $filter || false == $filter) {
+            <a href="/index.php?id=<?= $project_id; ?>&filter=1&show_completed=<?= $show_complete_tasks; ?>" class="tasks-switch__item <?php if (1 === $filter || false === $filter) {
                                                                                                                                             echo 'tasks-switch__item--active';
                                                                                                                                         } ?>">Все задачи</a>
-            <a href="/index.php?id=<?= $project_id; ?>&filter=2&show_completed=<?= $show_complete_tasks; ?>" class="tasks-switch__item <?php if (2 == $filter) {
+            <a href="/index.php?id=<?= $project_id; ?>&filter=2&show_completed=<?= $show_complete_tasks; ?>" class="tasks-switch__item <?php if (2 === $filter) {
                                                                                                                                             echo 'tasks-switch__item--active';
                                                                                                                                         } ?>">Повестка дня</a>
-            <a href="/index.php?id=<?= $project_id; ?>&filter=3&show_completed=<?= $show_complete_tasks; ?>"" class=" tasks-switch__item <?php if (3 == $filter) {
+            <a href="/index.php?id=<?= $project_id; ?>&filter=3&show_completed=<?= $show_complete_tasks; ?>"" class=" tasks-switch__item <?php if (3 === $filter) {
                                                                                                                                                 echo 'tasks-switch__item--active';
                                                                                                                                             } ?>">Завтра</a>
-            <a href="/index.php?id=<?= $project_id; ?>&filter=4&show_completed=<?= $show_complete_tasks; ?>" class="tasks-switch__item <?php if (4 == $filter) {
+            <a href="/index.php?id=<?= $project_id; ?>&filter=4&show_completed=<?= $show_complete_tasks; ?>" class="tasks-switch__item <?php if (4 === $filter) {
                                                                                                                                             echo 'tasks-switch__item--active';
                                                                                                                                         } ?>">Просроченные</a>
         </nav>
 
         <label class="checkbox">
             <!--Добавление атрибута "checked", если переменная $show_complete_tasks равна единице-->
-            <input class="checkbox__input visually-hidden show_completed" type="checkbox" <?php if (1 == $show_complete_tasks) echo 'checked'; ?>>
+            <input class="checkbox__input visually-hidden show_completed" type="checkbox" <?php if (1 === $show_complete_tasks) echo 'checked'; ?>>
             <span class="checkbox__text">Показывать выполненные</span>
         </label>
     </div>
     <!-- Вывод списка задач -->
     <table class="tasks">
         <?php foreach ($tasks as $key => $task) : ?>
-            <?php if ($task['task_status'] && 0 == $show_complete_tasks) continue; ?>
+            <?php if ($task['task_status'] && 0 === $show_complete_tasks) continue; ?>
             <tr class="tasks__item task <?php if ($task['task_status']) echo 'task--completed'; ?> <?php if (!empty($task['task_deadline']) && strtotime($task['task_deadline']) < strtotime("now + 24 hours")) echo 'task--important'; ?>">
                 <td class="task__select">
                     <label class="checkbox task__checkbox">

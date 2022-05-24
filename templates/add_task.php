@@ -28,7 +28,7 @@
         <?php endif; ?>
         <select class="form__input form__input--select <?= $project_class; ?>" name="project" id="project">
           <?php foreach ($projects as $project) : $project_name = $project['project_name']; ?>
-            <option value="<?= $project['project_id']; ?>" <?php if (get_post_val('project') == $project['project_id']) echo " selected"; ?>><?= htmlspecialchars($project_name); ?></option>
+            <option value="<?= $project['project_id']; ?>" <?php if (get_post_val('project') === $project['project_id']) echo " selected"; ?>><?= htmlspecialchars($project_name); ?></option>
           <?php endforeach; ?>
         </select>
       </div>

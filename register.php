@@ -2,6 +2,12 @@
 
 require_once('init.php');
 
+// Если пользователь уже авторизован, то при попытке открыть страницу регистрации он будет перенаправлен на главную страницу
+if (isset($user['user_id'])) {
+    header("Location: index.php");
+    exit;
+}
+
 // Массив с функциями для валидации полей формы запроса
 $rules = [
     'email' => function ($value) {
@@ -17,7 +23,7 @@ $rules = [
     }
 ];
 
-if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     // Подключение шаблона с формой
     $form_content = include_template('register.php');
