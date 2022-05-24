@@ -9,5 +9,5 @@ Thumbs.db
 vendor
 uploads/*
 !uploads/.gitkeep
-db.php
-mail.php
+config/db.php
+config/mail.php
