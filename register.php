@@ -3,7 +3,7 @@
 require_once('init.php');
 
 // Если пользователь уже авторизован, то при попытке открыть страницу регистрации он будет перенаправлен на главную страницу
-if (isset($user['user_id'])) {
+if (isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit;
 }
