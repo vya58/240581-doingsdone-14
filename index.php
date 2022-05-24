@@ -78,6 +78,7 @@ if ($project_id) {
 
     // Вывод ошибки 404 при несуществующем id проекта в полученном запросе
     $existence_project = mysqli_num_rows($sql_result);
+    
     if (false === $existence_project) {
         $content = include_template('404.php');
         $layoutContent = include_template('layout.php', [
