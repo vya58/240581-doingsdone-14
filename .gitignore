@@ -10,4 +10,4 @@ vendor
 uploads/*
 !uploads/.gitkeep
 db.php
-config/*
+mail.php

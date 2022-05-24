@@ -388,15 +388,15 @@ function preparation_insert_filtration($filter)
 {
     $sql_add = "";
 
-    if (2 == $filter) {
+    if (2 === $filter) {
         $sql_add = "AND DATE(task_deadline) = CURDATE() ";
     }
 
-    if (3 == $filter) {
+    if (3 === $filter) {
         $sql_add = "AND DATE(task_deadline) = DATE_ADD(CURDATE(), INTERVAL 1 DAY) ";
     }
 
-    if (4 == $filter) {
+    if (4 === $filter) {
         $sql_add = "AND DATE(task_deadline) < CURDATE() ";
     }
 

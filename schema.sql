@@ -4,8 +4,9 @@ CREATE DATABASE doings_done
 
 CREATE TABLE users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_email CHAR(255) NOT NULL UNIQUE,
-    user_name CHAR(50) NOT NULL,
+    user_email VARCHAR(255) NOT NULL UNIQUE,
+    user_name VARCHAR(50) NOT NULL,
+    /* Длина столбца "user_password" фиксирована */
     user_password CHAR(255) NOT NULL,
     user_date_add DATETIME NOT NULL
 );
